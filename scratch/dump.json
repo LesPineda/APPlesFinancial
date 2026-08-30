@@ -1,0 +1,594 @@
+{
+  "cuentas": [
+    {
+      "id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "nombre": "Banco Bogot\u00e1",
+      "tipo": "DEBITO",
+      "saldo_actual": -130919,
+      "createdAt": 1785975889218,
+      "updatedAt": 1788114218708
+    },
+    {
+      "id": "7f0c935f-9a11-41b6-aa3e-8c56940cfc07",
+      "nombre": "Banco Bogot\u00e1 Corriente",
+      "tipo": "DEBITO",
+      "saldo_actual": 1,
+      "createdAt": 1785975916404,
+      "updatedAt": 1785975916404
+    },
+    {
+      "id": "23a27e3c-1b36-4aeb-a514-0dfd8aa7cb7b",
+      "nombre": "Daviplata",
+      "tipo": "DEBITO",
+      "saldo_actual": -67333.1100000001,
+      "createdAt": 1785975996857,
+      "updatedAt": 1788108751748
+    },
+    {
+      "id": "790cf06e-d2db-43fe-973e-0c57e0ac5f60",
+      "nombre": "Falabella",
+      "tipo": "CREDITO",
+      "saldo_actual": -379113.5700000001,
+      "createdAt": 1785976690687,
+      "updatedAt": 1788114218709
+    },
+    {
+      "id": "600ca003-efeb-4472-90c0-f8dc990ab4a7",
+      "nombre": "Tarjeta Golds",
+      "tipo": "CREDITO",
+      "saldo_actual": -9600000,
+      "createdAt": 1785977044461,
+      "updatedAt": 1785977044461
+    },
+    {
+      "id": "c1b0f440-ca68-4a50-a8a2-37607e8f8bc4",
+      "nombre": "Credito libre 38",
+      "tipo": "CREDITO",
+      "saldo_actual": -38180363,
+      "createdAt": 1785977407979,
+      "updatedAt": 1785977407979
+    },
+    {
+      "id": "8fb1fc9d-51fc-46a2-9a31-72f0a90cd7df",
+      "nombre": "Credito libre 16",
+      "tipo": "CREDITO",
+      "saldo_actual": 15983045.77,
+      "createdAt": 1785977727208,
+      "updatedAt": 1787104762160
+    },
+    {
+      "id": "dea3b548-4fef-4897-813d-6c2a130b5df3",
+      "nombre": "Tuya Alkosto",
+      "tipo": "CREDITO",
+      "saldo_actual": -3900000,
+      "createdAt": 1785977954282,
+      "updatedAt": 1785977954282
+    },
+    {
+      "id": "398c5c6d-1da1-4ad6-b6fd-9fa30fc4b957",
+      "nombre": "Nequi",
+      "tipo": "DEBITO",
+      "saldo_actual": 4217.79,
+      "createdAt": 1785978171660,
+      "updatedAt": 1785978171660
+    },
+    {
+      "id": "6f6b1d43-8985-4e4b-b833-64a3ea57e257",
+      "nombre": "Addi",
+      "tipo": "CREDITO",
+      "saldo_actual": -336787,
+      "createdAt": 1785979014705,
+      "updatedAt": 1785979014705
+    },
+    {
+      "id": "027188a4-d8f4-45e0-aa53-57cf8a418dad",
+      "nombre": "Rapicredit",
+      "tipo": "CREDITO",
+      "saldo_actual": -305841,
+      "createdAt": 1785979283713,
+      "updatedAt": 1785979283713
+    },
+    {
+      "id": "8788de82-e64c-4d8a-a48d-963eaef19040",
+      "nombre": "Solventa",
+      "tipo": "CREDITO",
+      "saldo_actual": -672655,
+      "createdAt": 1785979571770,
+      "updatedAt": 1785979571770
+    },
+    {
+      "id": "a577d234-d256-4fce-b9cb-fbab49017416",
+      "nombre": "Megan",
+      "tipo": "EFECTIVO",
+      "saldo_actual": 0,
+      "createdAt": 1787097278055,
+      "updatedAt": 1787098454592
+    },
+    {
+      "id": "1e585373-4ed9-4bfd-bc0c-80a1c9f9887b",
+      "nombre": "telefonica movil",
+      "tipo": "EFECTIVO",
+      "saldo_actual": 38000,
+      "createdAt": 1787097361153,
+      "updatedAt": 1787097361153
+    },
+    {
+      "id": "b6db8cb0-9d01-4fd7-9ea3-e5e0135a0cd5",
+      "nombre": "Plan Tigo",
+      "tipo": "SERVICIO",
+      "saldo_actual": 0,
+      "createdAt": 1787100555037,
+      "updatedAt": 1787104002000
+    },
+    {
+      "id": "5e697db1-a720-4269-aed3-834fa133980c",
+      "nombre": "Internet",
+      "tipo": "SERVICIO",
+      "saldo_actual": 127990,
+      "createdAt": 1787100823956,
+      "updatedAt": 1787100823956
+    },
+    {
+      "id": "b034f5c4-d799-4054-8543-5241810751dc",
+      "nombre": "Gas",
+      "tipo": "SERVICIO",
+      "saldo_actual": 4400,
+      "createdAt": 1787102487985,
+      "updatedAt": 1787104627593
+    },
+    {
+      "id": "0461ea92-6170-4db5-b343-f9c22b07cbc0",
+      "nombre": "Cadena",
+      "tipo": "SERVICIO",
+      "saldo_actual": 600000,
+      "createdAt": 1787103720148,
+      "updatedAt": 1788049959986
+    },
+    {
+      "id": "a7ba816c-525b-46f4-b810-9bd1aaa8e46b",
+      "nombre": "Apartamento",
+      "tipo": "SERVICIO",
+      "saldo_actual": 826000,
+      "createdAt": 1787107178047,
+      "updatedAt": 1787107178047
+    },
+    {
+      "id": "b72ec107-cedd-4af6-bc14-523cd4d53706",
+      "nombre": "arriendo pa",
+      "tipo": "SERVICIO",
+      "saldo_actual": 700000,
+      "createdAt": 1788027779559,
+      "updatedAt": 1788027779559
+    },
+    {
+      "id": "8586e6e8-f100-43ce-810f-768ada2570c3",
+      "nombre": "luz",
+      "tipo": "SERVICIO",
+      "saldo_actual": 197000,
+      "createdAt": 1788028258445,
+      "updatedAt": 1788028258445
+    }
+  ],
+  "deudas": [
+    {
+      "id": "7265c7cc-e3a8-4654-a13e-161ec9ce5ec5",
+      "cuenta_id": "790cf06e-d2db-43fe-973e-0c57e0ac5f60",
+      "saldo_total": 379113.5700000001,
+      "tasa_interes_ea": 28.15,
+      "pago_minimo": 271520.7,
+      "fecha_corte": 1784851200000,
+      "fecha_limite_pago": 1794268800000,
+      "createdAt": 1785976963087,
+      "updatedAt": 1788114218709
+    },
+    {
+      "id": "183025e7-ea7e-4473-bcff-8becfa6ff883",
+      "cuenta_id": "600ca003-efeb-4472-90c0-f8dc990ab4a7",
+      "saldo_total": 9049060,
+      "tasa_interes_ea": 26.72,
+      "pago_minimo": 665000,
+      "fecha_corte": 1784073600000,
+      "fecha_limite_pago": 1791158400000,
+      "createdAt": 1785977307777,
+      "updatedAt": 1788027226478
+    },
+    {
+      "id": "ab524b9b-b979-4ecb-98e8-d6bd72934fb6",
+      "cuenta_id": "c1b0f440-ca68-4a50-a8a2-37607e8f8bc4",
+      "saldo_total": 38180363,
+      "tasa_interes_ea": 21.55,
+      "pago_minimo": 924375,
+      "fecha_corte": 1783728000000,
+      "fecha_limite_pago": 1782345600000,
+      "createdAt": 1785977602575,
+      "updatedAt": 1787101458004
+    },
+    {
+      "id": "82adf46f-49f3-40ee-a677-29929174d3d7",
+      "cuenta_id": "8fb1fc9d-51fc-46a2-9a31-72f0a90cd7df",
+      "saldo_total": 15661293.77,
+      "tasa_interes_ea": 25.19,
+      "pago_minimo": 423274.83,
+      "fecha_corte": 1783382400000,
+      "fecha_limite_pago": 1785628800000,
+      "createdAt": 1785977828470,
+      "updatedAt": 1788027193298
+    },
+    {
+      "id": "10b0cc44-d593-4250-8180-cfae77a5f6ec",
+      "cuenta_id": "dea3b548-4fef-4897-813d-6c2a130b5df3",
+      "saldo_total": 3900000,
+      "tasa_interes_ea": 28.14,
+      "pago_minimo": 415971.98,
+      "fecha_corte": 1784505600000,
+      "fecha_limite_pago": 1788307200000,
+      "createdAt": 1785978111231,
+      "updatedAt": 1788034141338
+    },
+    {
+      "id": "e25bc779-96e4-4ca4-b428-78b5a0e8d073",
+      "cuenta_id": "6f6b1d43-8985-4e4b-b833-64a3ea57e257",
+      "saldo_total": 256192.41,
+      "tasa_interes_ea": 28.69,
+      "pago_minimo": 80411,
+      "fecha_corte": 1784073600000,
+      "fecha_limite_pago": 1789344000000,
+      "createdAt": 1785979200285,
+      "updatedAt": 1787106085346
+    },
+    {
+      "id": "3d7d3d2b-ef11-4004-ba4e-c8ec8fd48a7a",
+      "cuenta_id": "027188a4-d8f4-45e0-aa53-57cf8a418dad",
+      "saldo_total": 299603,
+      "tasa_interes_ea": 25,
+      "pago_minimo": 326308,
+      "fecha_corte": 1784678400000,
+      "fecha_limite_pago": 1792540800000,
+      "createdAt": 1785979429487,
+      "updatedAt": 1788052028485
+    },
+    {
+      "id": "321f0568-8844-469b-a59c-b7acf126d180",
+      "cuenta_id": "8788de82-e64c-4d8a-a48d-963eaef19040",
+      "saldo_total": 678135,
+      "tasa_interes_ea": 25,
+      "pago_minimo": 672655,
+      "fecha_corte": 1784678400000,
+      "fecha_limite_pago": 1789430400000,
+      "createdAt": 1785979848552,
+      "updatedAt": 1787105300348
+    },
+    {
+      "id": "f61560e0-a0a5-40e0-9398-58560b896cab",
+      "cuenta_id": "a577d234-d256-4fce-b9cb-fbab49017416",
+      "saldo_total": 0,
+      "tasa_interes_ea": 0,
+      "pago_minimo": 160000,
+      "fecha_corte": 1787011200000,
+      "fecha_limite_pago": 1789689600000,
+      "createdAt": 1787097383748,
+      "updatedAt": 1787101956808
+    },
+    {
+      "id": "80fa6361-79e9-4cfc-9b7d-0aaeaf009996",
+      "cuenta_id": "1e585373-4ed9-4bfd-bc0c-80a1c9f9887b",
+      "saldo_total": 0,
+      "tasa_interes_ea": 0,
+      "pago_minimo": 0,
+      "fecha_corte": 1787011200000,
+      "fecha_limite_pago": 1789689600000,
+      "createdAt": 1787097399010,
+      "updatedAt": 1788040178959
+    },
+    {
+      "id": "c76cb2d7-73e5-4425-85f4-381f91600078",
+      "cuenta_id": "b6db8cb0-9d01-4fd7-9ea3-e5e0135a0cd5",
+      "saldo_total": 75000,
+      "tasa_interes_ea": 0,
+      "pago_minimo": 75000,
+      "fecha_corte": 1785801600000,
+      "fecha_limite_pago": 1784937600000,
+      "createdAt": 1787100574444,
+      "updatedAt": 1787104002004
+    },
+    {
+      "id": "78f0781d-5a60-480b-a383-687d6b548a2b",
+      "cuenta_id": "5e697db1-a720-4269-aed3-834fa133980c",
+      "saldo_total": 127990,
+      "tasa_interes_ea": 0,
+      "pago_minimo": 127990,
+      "fecha_corte": 1786320000000,
+      "fecha_limite_pago": 1789689600000,
+      "createdAt": 1787101099411,
+      "updatedAt": 1787107142918
+    },
+    {
+      "id": "90f93b56-c0fe-4c53-8d5d-39b330882097",
+      "cuenta_id": "b034f5c4-d799-4054-8543-5241810751dc",
+      "saldo_total": 45000,
+      "tasa_interes_ea": 0,
+      "pago_minimo": 25000,
+      "fecha_corte": 1786060800000,
+      "fecha_limite_pago": 1794960000000,
+      "createdAt": 1787102506536,
+      "updatedAt": 1788041495640
+    },
+    {
+      "id": "c5d9f59e-98a4-41bf-8913-4aa6d2a4f150",
+      "cuenta_id": "a7ba816c-525b-46f4-b810-9bd1aaa8e46b",
+      "saldo_total": 876000,
+      "tasa_interes_ea": 0,
+      "pago_minimo": 876000,
+      "fecha_corte": 1787616000000,
+      "fecha_limite_pago": 1790294400000,
+      "createdAt": 1787107236816,
+      "updatedAt": 1788028057316
+    },
+    {
+      "id": "30b027b9-4cf5-4436-8a51-b18d30e41839",
+      "cuenta_id": "b72ec107-cedd-4af6-bc14-523cd4d53706",
+      "saldo_total": 700000,
+      "tasa_interes_ea": 0,
+      "pago_minimo": 700000,
+      "fecha_corte": 1790726400000,
+      "fecha_limite_pago": 1790899200000,
+      "createdAt": 1788027817736,
+      "updatedAt": 1788027898922
+    },
+    {
+      "id": "4fc93fc2-652e-4872-a956-f864c6a0185a",
+      "cuenta_id": "8586e6e8-f100-43ce-810f-768ada2570c3",
+      "saldo_total": 197000,
+      "tasa_interes_ea": 0,
+      "pago_minimo": 197000,
+      "fecha_corte": 1787875200000,
+      "fecha_limite_pago": 1790899200000,
+      "createdAt": 1788028306168,
+      "updatedAt": 1788028345315
+    },
+    {
+      "id": "5c6649cc-addb-4baf-8e02-6199d75ccf38",
+      "cuenta_id": "0461ea92-6170-4db5-b343-f9c22b07cbc0",
+      "saldo_total": 200000,
+      "tasa_interes_ea": 0,
+      "pago_minimo": 200000,
+      "fecha_corte": 1787184000000,
+      "fecha_limite_pago": 1790899200000,
+      "createdAt": 1788040179256,
+      "updatedAt": 1788041882846
+    },
+    {
+      "id": "b87eadb8-ea55-402d-98f4-125bf62eb8b9",
+      "cuenta_id": "0461ea92-6170-4db5-b343-f9c22b07cbc0",
+      "saldo_total": 200000,
+      "tasa_interes_ea": 0,
+      "pago_minimo": 200000,
+      "fecha_corte": 1787184000000,
+      "fecha_limite_pago": 1789430400000,
+      "createdAt": 1788040179424,
+      "updatedAt": 1788040179424
+    }
+  ],
+  "transacciones": [
+    {
+      "id": "502312c9-6bdc-4d7b-b808-6a9f8bb962e7",
+      "cuenta_id": "23a27e3c-1b36-4aeb-a514-0dfd8aa7cb7b",
+      "tipo": "INGRESO",
+      "monto": 2696444,
+      "fecha_transaccion": 1787096880000,
+      "descripcion": "Nomina asistia",
+      "createdAt": 1787097060615,
+      "updatedAt": 1787097060615
+    },
+    {
+      "id": "4e2758bb-14b7-4bb4-8ada-0db705e97d28",
+      "cuenta_id": "23a27e3c-1b36-4aeb-a514-0dfd8aa7cb7b",
+      "tipo": "GASTO",
+      "monto": 160000,
+      "fecha_transaccion": 1787098380000,
+      "descripcion": "Pago cuota Megan",
+      "createdAt": 1787098454556,
+      "updatedAt": 1788042434808
+    },
+    {
+      "id": "e1c54c78-8ab9-47db-bad1-9cd8b98ad306",
+      "cuenta_id": "23a27e3c-1b36-4aeb-a514-0dfd8aa7cb7b",
+      "tipo": "GASTO",
+      "monto": 75000,
+      "fecha_transaccion": 1787103960000,
+      "descripcion": "Pago cuota Plan Tigo",
+      "createdAt": 1787104001998,
+      "updatedAt": 1787104165018
+    },
+    {
+      "id": "c9c29951-5501-4e35-a9ae-c659d219aac9",
+      "cuenta_id": "b034f5c4-d799-4054-8543-5241810751dc",
+      "tipo": "GASTO",
+      "monto": 20600,
+      "fecha_transaccion": 1787104560000,
+      "descripcion": "Pago cuota Gas",
+      "createdAt": 1787104627589,
+      "updatedAt": 1787104627589
+    },
+    {
+      "id": "ce017b38-e31f-47f5-8a22-9246bde20594",
+      "cuenta_id": "8fb1fc9d-51fc-46a2-9a31-72f0a90cd7df",
+      "tipo": "GASTO",
+      "monto": 423628.82,
+      "fecha_transaccion": 1787104680000,
+      "descripcion": "Pago cuota Credito libre 16",
+      "createdAt": 1787104762157,
+      "updatedAt": 1787104762157
+    },
+    {
+      "id": "04eace44-d206-406a-b2bb-56a54f4375c3",
+      "cuenta_id": "8788de82-e64c-4d8a-a48d-963eaef19040",
+      "tipo": "GASTO",
+      "monto": 678135,
+      "fecha_transaccion": 1787105220000,
+      "descripcion": "Pago cuota Solventa",
+      "createdAt": 1787105300339,
+      "updatedAt": 1787105300339
+    },
+    {
+      "id": "1d0d30fa-a64c-41f0-9e0a-d67854d29696",
+      "cuenta_id": "0461ea92-6170-4db5-b343-f9c22b07cbc0",
+      "tipo": "GASTO",
+      "monto": 400000,
+      "fecha_transaccion": 1787105820000,
+      "descripcion": "Pago cuota Cadena",
+      "createdAt": 1787105872738,
+      "updatedAt": 1787105872738
+    },
+    {
+      "id": "c4032fd3-9db8-4c70-af5c-15430af5806b",
+      "cuenta_id": "6f6b1d43-8985-4e4b-b833-64a3ea57e257",
+      "tipo": "GASTO",
+      "monto": 80594.59,
+      "fecha_transaccion": 1787106060000,
+      "descripcion": "Pago cuota Addi",
+      "createdAt": 1787106085340,
+      "updatedAt": 1787106085340
+    },
+    {
+      "id": "7098e1c9-b87f-49d1-8c7b-18878d6e80ab",
+      "cuenta_id": "790cf06e-d2db-43fe-973e-0c57e0ac5f60",
+      "tipo": "GASTO",
+      "monto": 271520.7,
+      "fecha_transaccion": 1787106240000,
+      "descripcion": "Pago cuota Falabella",
+      "createdAt": 1787106353747,
+      "updatedAt": 1787106353747
+    },
+    {
+      "id": "ecbc957d-bd5c-464a-98d6-88269edc8f06",
+      "cuenta_id": "027188a4-d8f4-45e0-aa53-57cf8a418dad",
+      "tipo": "GASTO",
+      "monto": 326308,
+      "fecha_transaccion": 1787106840000,
+      "descripcion": "Pago cuota Rapicredit",
+      "createdAt": 1787106901793,
+      "updatedAt": 1787106901793
+    },
+    {
+      "id": "e090ec47-d30d-4740-a63f-41a8b731a9e3",
+      "cuenta_id": "5e697db1-a720-4269-aed3-834fa133980c",
+      "tipo": "GASTO",
+      "monto": 127990,
+      "fecha_transaccion": 1787107080000,
+      "descripcion": "Pago cuota Internet",
+      "createdAt": 1787107142911,
+      "updatedAt": 1787107142911
+    },
+    {
+      "id": "647136d0-8907-4072-8459-9fd6f0f41ca5",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "INGRESO",
+      "monto": 3434375,
+      "fecha_transaccion": 1787940660000,
+      "descripcion": "nomina ortomac",
+      "createdAt": 1788027148744,
+      "updatedAt": 1788027148744
+    },
+    {
+      "id": "05ee2586-d8af-47be-bd1f-c5ef5debf2d2",
+      "cuenta_id": "8fb1fc9d-51fc-46a2-9a31-72f0a90cd7df",
+      "tipo": "GASTO",
+      "monto": 321752,
+      "fecha_transaccion": 1788027120000,
+      "descripcion": "Pago cuota Credito libre 16",
+      "createdAt": 1788027193291,
+      "updatedAt": 1788027193291
+    },
+    {
+      "id": "4ef1df6a-336a-4298-ae37-28ccb2970696",
+      "cuenta_id": "600ca003-efeb-4472-90c0-f8dc990ab4a7",
+      "tipo": "GASTO",
+      "monto": 550940,
+      "fecha_transaccion": 1788027180000,
+      "descripcion": "Pago cuota Tarjeta Golds",
+      "createdAt": 1788027226472,
+      "updatedAt": 1788027226472
+    },
+    {
+      "id": "fe7857f1-eea9-403f-85a9-09575a847e0c",
+      "cuenta_id": "1e585373-4ed9-4bfd-bc0c-80a1c9f9887b",
+      "tipo": "GASTO",
+      "monto": 38000,
+      "fecha_transaccion": 1788027480000,
+      "descripcion": "Pago cuota telefonica movil",
+      "createdAt": 1788027502810,
+      "updatedAt": 1788027502810
+    },
+    {
+      "id": "9d464fe8-cd93-421d-8777-9123cfbfaa49",
+      "cuenta_id": "b72ec107-cedd-4af6-bc14-523cd4d53706",
+      "tipo": "GASTO",
+      "monto": 700000,
+      "fecha_transaccion": 1788027840000,
+      "descripcion": "Pago cuota arriendo pa",
+      "createdAt": 1788027898917,
+      "updatedAt": 1788027898917
+    },
+    {
+      "id": "c963b7e9-4f55-4a6f-ae1a-9b516d585ec4",
+      "cuenta_id": "a7ba816c-525b-46f4-b810-9bd1aaa8e46b",
+      "tipo": "GASTO",
+      "monto": 876000,
+      "fecha_transaccion": 1788028020000,
+      "descripcion": "Pago cuota Apartamento",
+      "createdAt": 1788028057311,
+      "updatedAt": 1788028057311
+    },
+    {
+      "id": "7d68aa29-c60b-4ad4-ab8f-c176e7609393",
+      "cuenta_id": "8586e6e8-f100-43ce-810f-768ada2570c3",
+      "tipo": "GASTO",
+      "monto": 197000,
+      "fecha_transaccion": 1788028320000,
+      "descripcion": "Pago cuota luz",
+      "createdAt": 1788028345310,
+      "updatedAt": 1788028345310
+    },
+    {
+      "id": "cfe95963-a26c-495a-a8e8-2e0980990f8e",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "GASTO",
+      "monto": 137000,
+      "fecha_transaccion": 1788042300000,
+      "descripcion": "otros ajuste",
+      "createdAt": 1788042376807,
+      "updatedAt": 1788042376807
+    },
+    {
+      "id": "5f523f4c-a659-4748-9bbf-ce7a4280e284",
+      "cuenta_id": "027188a4-d8f4-45e0-aa53-57cf8a418dad",
+      "tipo": "GASTO",
+      "monto": 299603,
+      "fecha_transaccion": 1788051960000,
+      "descripcion": "Pago cuota Rapicredit",
+      "createdAt": 1788052028480,
+      "updatedAt": 1788052028480
+    },
+    {
+      "id": "092c6b3a-cd0c-413f-a232-74cd37cf7705",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "GASTO",
+      "monto": 45000,
+      "fecha_transaccion": 1788023220000,
+      "descripcion": "Gasolina Moto",
+      "createdAt": 1788053758662,
+      "updatedAt": 1788053758662
+    },
+    {
+      "id": "dd48d0c7-6063-4a03-ad7e-f257b3a7707f",
+      "cuenta_id": "790cf06e-d2db-43fe-973e-0c57e0ac5f60",
+      "tipo": "GASTO",
+      "monto": 200000,
+      "fecha_transaccion": 1788114180000,
+      "descripcion": "Pago cuota Falabella",
+      "createdAt": 1788114218704,
+      "updatedAt": 1788114218704
+    }
+  ]
+}

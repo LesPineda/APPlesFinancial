@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APPles Financial - Dashboard de Finanzas Personales</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Firebase App & Auth SDK (Compat Mode) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/550/550638.png">
+  
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <!-- Ambient Background Glows -->
+  <div class="glow-bg glow-purple"></div>
+  <div class="glow-bg glow-blue"></div>
+
+  <div id="dashboard-app" class="hidden">
+    <div class="app-container">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-brand">
+          <div class="brand-logo">
+            <i class="fa-solid fa-chart-pie"></i>
+          </div>
+          <div>
+            <h1>APPles Financial</h1>
+            <p>Optimización de Flujo de Caja y Liquidación de Deudas</p>
+          </div>
+        </div>
+        <div class="header-status">
+          <span class="status-indicator online"></span>
+          <span id="api-status">Conectando con Backend...</span>
+          <div class="logout-btn-wrapper">
+            <button id="btn-logout" title="Cerrar sesión"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
+          </div>
+        </div>
+    </header>
+
+    <!-- Main Grid Dashboard -->
+    <main class="dashboard-grid">
+      
+      <!-- COLUMN 1: Accounts and Webhook Simulator -->
+      <section class="grid-col col-accounts">
+        
+        <!-- Accounts Card -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-wallet"></i> Mis Cuentas</h2>
+            <button id="btn-show-add-account" class="btn btn-icon" title="Agregar Cuenta">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+          
+          <!-- Add Account Form (Hidden by default) -->
+          <form id="form-add-account" class="inline-form hidden">
+            <h3>Nueva Cuenta</h3>
+            <div class="form-group">
+              <input type="text" id="acc-nombre" placeholder="Nombre (ej: Nequi)" required>
+            </div>
+            <div class="form-row">
+              <select id="acc-tipo" required>
+                <option value="" disabled selected>Tipo de Cuenta / Servicio</option>
+                <option value="DEBITO">Débito (Banco)</option>
+                <option value="CREDITO">Crédito (Tarjeta / Préstamo)</option>
+                <option value="EFECTIVO">Efectivo</option>
+                <option value="SERVICIO">Servicio Fijo / Público (Luz, Gas, etc.)</option>
+              </select>
+              <input type="number" id="acc-saldo" placeholder="Saldo actual" step="0.01" required>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" id="btn-cancel-account" class="btn btn-secondary">Cancelar</button>
+            </div>
+          </form>
+
+          <div id="accounts-list" class="accounts-list">
+            <!-- Dynamically populated -->
+            <div class="loading-spinner">Cargando cuentas...</div>
+          </div>
+        </div>
+
+        <!-- Webhook Simulator Card -->
+        <div class="glass-card webhook-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-robot"></i> Simulador de Webhooks (Open Finance)</h2>
+          </div>
+          <p class="card-desc">Simula el parseo automático de un SMS de tu banco (ej: Nequi o Davivienda). Si la cuenta no existe en el sistema, el webhook la creará automáticamente y actualizará los saldos.</p>
+          
+          <form id="form-webhook" class="webhook-form">
+            <div class="form-group">
+              <label for="web-cuenta">Nombre del Banco / Plataforma</label>
+              <input type="text" id="web-cuenta" placeholder="Ej: Davivienda, Nequi, Bancolombia" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="web-tipo">Tipo de Operación</label>
+                <select id="web-tipo" required>
+                  <option value="GASTO" selected>Gasto / Transferencia Saliente</option>
+                  <option value="INGRESO">Ingreso / Depósito</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="web-monto">Monto ($)</label>
+                <input type="number" id="web-monto" placeholder="Ej: 50000" step="0.01" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="web-descripcion">Descripción del mensaje</label>
+              <input type="text" id="web-descripcion" placeholder="Ej: Compra en Éxito de 50000" required>
+            </div>
+            <button type="submit" class="btn btn-accent btn-full">
+              <i class="fa-solid fa-paper-plane"></i> Enviar Payload Webhook
+            </button>
+          </form>
+          <div id="webhook-feedback" class="feedback-msg hidden"></div>
+        </div>
+
+      </section>
+
+      <!-- COLUMN 2: Debts and Optimization -->
+      <section class="grid-col col-debts">
+        
+        <!-- Debts Card -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-scale-unbalanced-key"></i> Mis Deudas</h2>
+            <button id="btn-show-add-debt" class="btn btn-icon" title="Agregar Deuda">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+
+          <div class="debt-filters" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+            <button class="btn btn-secondary btn-sm active" id="filter-debt-all" style="font-size: 0.75rem; padding: 0.4rem 0.8rem; border-radius: 8px;">
+              Todas
+            </button>
+            <button class="btn btn-secondary btn-sm" id="filter-debt-q1" style="font-size: 0.75rem; padding: 0.4rem 0.8rem; border-radius: 8px;">
+              📅 Q1: Fin de Mes (1-14)
+            </button>
+            <button class="btn btn-secondary btn-sm" id="filter-debt-q2" style="font-size: 0.75rem; padding: 0.4rem 0.8rem; border-radius: 8px;">
+              📅 Q2: Mitad de Mes (15-31)
+            </button>
+          </div>
+
+          <!-- Add Debt Form (Hidden by default) -->
+          <form id="form-add-debt" class="inline-form hidden">
+            <h3>Nueva Obligación / Deuda</h3>
+            <div class="form-group">
+              <select id="debt-cuenta" required>
+                <!-- Dynamically populated with accounts -->
+                <option value="" disabled selected>Asociar a Cuenta</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <input type="number" id="debt-saldo" placeholder="Saldo Total" step="0.01" required>
+              <input type="number" id="debt-tasa" placeholder="Tasa E.A. (%)" step="0.01" required>
+            </div>
+            <div class="form-row">
+              <input type="number" id="debt-pago" placeholder="Pago Mínimo" step="0.01" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Fecha Corte</label>
+                <input type="date" id="debt-corte" required>
+              </div>
+              <div class="form-group">
+                <label>Fecha Límite</label>
+                <input type="date" id="debt-limite" required>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" id="btn-cancel-debt" class="btn btn-secondary">Cancelar</button>
+            </div>
+          </form>
+
+          <div id="debts-list" class="debts-list">
+            <!-- Dynamically populated -->
+            <div class="loading-spinner">Cargando deudas...</div>
+          </div>
+        </div>
+
+        <!-- Debt Simulator Card -->
+        <div class="glass-card debt-simulator-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-calculator"></i> Simulador de Aceleración</h2>
+          </div>
+          <p class="card-desc">Proyecta mes a mes cómo se liquidan tus deudas al inyectar un monto extra y acumular las cuotas (pago doble/triple).</p>
+          
+          <div class="form-group">
+            <label for="sim-extra">Abono Extra Mensual ($)</label>
+            <input type="number" id="sim-extra" placeholder="Ej: 200000" step="0.01" value="200000">
+          </div>
+          <button id="btn-run-simulation" class="btn btn-primary btn-full">
+            <i class="fa-solid fa-play"></i> Ejecutar Proyección
+          </button>
+
+          <div id="simulation-results" class="simulation-results hidden">
+            <div id="sim-metrics" class="sim-metrics"></div>
+            <div id="sim-table-container" class="sim-table-container"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- COLUMN 3: Optimization Strategy Plan & Cash Flow Report -->
+      <section class="grid-col col-optimization">
+        
+        <!-- Live Cash Flow & Diagnostic Card -->
+        <div class="glass-card cash-flow-card">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <h2><i class="fa-solid fa-chart-line text-success"></i> Diagnóstico de Flujo de Caja</h2>
+            <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 0.25rem 0.6rem; border-radius: 10px;">
+              <span style="color: var(--text-muted); font-weight: 700; white-space: nowrap;"><i class="fa-solid fa-wallet text-primary"></i> Disponible hoy:</span>
+              <span id="cash-flow-budget" style="color: #fff; font-weight: 800; font-size: 0.85rem; text-align: right;">$0</span>
+            </div>
+          </div>
+          <div id="cash-flow-report-content">
+            <div class="loading-spinner">Generando diagnóstico...</div>
+          </div>
+        </div>
+
+        <!-- Plan de Optimización Card -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-wand-magic-sparkles text-primary"></i> Plan de Optimización</h2>
+          </div>
+          <p class="card-desc">Secuencia inteligente para liquidar únicamente tus deudas pendientes activas en el menor tiempo.</p>
+
+          <div class="prioritization-controls" style="margin-bottom: 1.2rem;">
+            <label for="select-method"><i class="fa-solid fa-sliders"></i> Seleccionar Estrategia:</label>
+            <select id="select-method" class="form-control">
+              <option value="Bola de Nieve" selected>🏔️ Bola de Nieve (Menor Saldo primero)</option>
+              <option value="Avalancha">⚡ Avalancha (Mayor Interés primero)</option>
+            </select>
+          </div>
+
+          <div id="opt-target-summary" class="opt-target-box">
+            <!-- Dynamically populated target debt #1 -->
+          </div>
+
+          <div id="optimization-plan-list" class="optimization-plan-list">
+            <!-- Dynamically populated active debt steps -->
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 3: Transactions History -->
+      <section class="grid-col col-transactions">
+        
+        <!-- Transactions Card -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-list-check"></i> Historial de Movimientos</h2>
+            <button id="btn-show-add-transaction" class="btn btn-icon" title="Registrar Transacción">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+
+          <!-- Add Transaction Form (Hidden by default) -->
+          <form id="form-add-transaction" class="inline-form hidden">
+            <h3>Nueva Transacción Manual</h3>
+            <div class="form-group">
+              <select id="tx-cuenta" required>
+                <!-- Dynamically populated -->
+                <option value="" disabled selected>Selecciona Cuenta</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <select id="tx-tipo" required>
+                <option value="GASTO" selected>Gasto</option>
+                <option value="INGRESO">Ingreso</option>
+              </select>
+              <input type="number" id="tx-monto" placeholder="Monto" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <input type="text" id="tx-descripcion" placeholder="Descripción" required>
+            </div>
+            <div class="form-group">
+              <label>Fecha</label>
+              <input type="datetime-local" id="tx-fecha" required>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Registrar</button>
+              <button type="button" id="btn-cancel-tx" class="btn btn-secondary">Cancelar</button>
+            </div>
+          </form>
+
+          <div id="transactions-list" class="transactions-list">
+            <!-- Dynamically populated -->
+            <div class="loading-spinner">Cargando movimientos...</div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div></div>
+
+  <!-- Login Screen Overlay (Shown by default) -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="glass-card login-card animate-slide-down">
+      <div class="login-logo">
+        <i class="fa-solid fa-chart-pie"></i>
+      </div>
+      <h2>APPles Financial</h2>
+      <p>Bienvenido a tu optimizador de flujo de caja y liquidación de deudas. Acceso privado exclusivo para <strong>pinedamillos@gmail.com</strong>.</p>
+      <button id="btn-login" class="btn-google">
+        <i class="fa-brands fa-google"></i> Iniciar Sesión con Google
+      </button>
+      <div class="login-footer">
+        APPLES FINANCIAL &copy; 2026 &bull; CONTROL DE ACCESO
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Debt Modal -->
+  <div id="edit-debt-modal" class="modal-overlay hidden">
+    <div class="glass-card modal-card" style="max-width: 480px; width: 90%;">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-pen-to-square text-primary"></i> Actualizar Deuda / Ponerse al Día</h2>
+      </div>
+      <form id="form-edit-debt" class="inline-form">
+        <input type="hidden" id="edit-debt-id">
+        <div class="form-group">
+          <label for="edit-debt-nombre">Cuenta / Deuda</label>
+          <input type="text" id="edit-debt-nombre" disabled style="opacity:0.7;">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-debt-saldo">Saldo Total Adeudado ($)</label>
+            <input type="number" id="edit-debt-saldo" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-debt-pago">Cuota Mensual ($)</label>
+            <input type="number" id="edit-debt-pago" step="0.01" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-debt-limite">Fecha Límite de Pago / Mes Vencido</label>
+          <input type="date" id="edit-debt-limite" required>
+          <small style="color: var(--text-muted); font-size: 0.75rem; margin-top:0.3rem; display:block;">
+            Ajusta esta fecha para marcar desde qué mes estás atrasado, o muévela al mes actual/siguiente si te pusiste al día.
+          </small>
+        </div>
+        <div class="modal-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" id="btn-pause-debt" class="btn btn-secondary" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);" title="Establecer saldo a $0 para pausar/cancelar sin borrar historial">
+            <i class="fa-solid fa-circle-pause"></i> Pausar / Cancelar ($0)
+          </button>
+          <div style="flex:1;"></div>
+          <button type="button" id="btn-cancel-edit-debt" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Custom Confirmation Modal -->
+  <div id="confirm-modal" class="modal-overlay hidden">
+    <div class="glass-card modal-card" style="max-width: 400px; width: 90%; text-align: center;">
+      <div style="font-size: 2.5rem; color: var(--warning); margin-bottom: 0.75rem;">
+        <i class="fa-solid fa-circle-question"></i>
+      </div>
+      <div class="modal-header" style="justify-content: center; margin-bottom: 0.5rem;">
+        <h2 style="justify-content: center;">Confirmación</h2>
+      </div>
+      <p id="confirm-modal-text"></p>
+      <div class="modal-actions" style="justify-content: center; margin-top: 1.5rem;">
+        <button type="button" id="btn-confirm-cancel" class="btn btn-secondary">Cancelar</button>
+        <button type="button" id="btn-confirm-accept" class="btn btn-primary">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=15"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('PWA Service Worker Registrado:', reg.scope))
+          .catch(err => console.log('Error registrando Service Worker:', err));
+      });
+    }
+  </script>
+</body>
+</html>

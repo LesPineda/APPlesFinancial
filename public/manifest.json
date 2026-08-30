@@ -1,0 +1,23 @@
+{
+  "short_name": "APPles Financial",
+  "name": "APPles Financial - Dashboard de Finanzas Personales",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/550/550638.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/550/550638.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "display": "standalone",
+  "orientation": "portrait"
+}
