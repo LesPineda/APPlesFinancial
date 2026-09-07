@@ -38,6 +38,7 @@ export const errorHandler = (
   console.error('Unhandled Error:', err);
   return res.status(500).json({
     status: 'error',
-    message: 'Ocurrió un error interno en el servidor.',
+    message: err.message || 'Ocurrió un error interno en el servidor.',
+    code: (err as any).code
   });
 };
