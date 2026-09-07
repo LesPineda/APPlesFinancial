@@ -5,6 +5,8 @@ import apiRoutes from './routes';
 import { errorHandler } from './middlewares/error.middleware';
 import { authMiddleware } from './middlewares/auth.middleware';
 
+import path from 'path';
+
 dotenv.config();
 
 const app = express();
@@ -12,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(process.cwd(), 'public')));
 
 // Ruta de salud de la API
 app.get('/health', (_req, res) => {
