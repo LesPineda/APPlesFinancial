@@ -1,27 +1,13 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "src/app.ts",
-      "use": "@vercel/node"
+      "source": "/api/(.*)",
+      "destination": "/api"
     },
     {
-      "src": "public/**/*",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "src/app.ts"
-    },
-    {
-      "src": "/health",
-      "dest": "src/app.ts"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "public/$1"
+      "source": "/health",
+      "destination": "/api"
     }
   ]
 }
