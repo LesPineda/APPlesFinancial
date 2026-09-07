@@ -2082,27 +2082,26 @@ async function initializeFirebase() {
     return;
   }
 
-  // Intentar cargar inicialización automática de Firebase Hosting en producción
+  // Inicializar Firebase SDK explícitamente (compatible con Vercel, Firebase o cualquier servidor)
   try {
-    const res = await fetch('/__/firebase/init.js');
-    if (res.ok && res.headers.get('content-type')?.includes('javascript')) {
-      const script = document.createElement('script');
-      script.src = '/__/firebase/init.js';
-      document.body.appendChild(script);
-      
-      await new Promise(resolve => {
-        script.onload = () => {
-          setupAuthListeners();
-          resolve();
-        };
-      });
+    if (typeof firebase !== 'undefined') {
+      if (!firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey: "AIzaSyCI91OFTw7dcFvyi43GGxoQAL6cTHOQo18",
+          authDomain: "appfinaciera-1be81.firebaseapp.com",
+          projectId: "appfinaciera-1be81",
+          storageBucket: "appfinaciera-1be81.firebasestorage.app",
+          messagingSenderId: "490258842612"
+        });
+      }
+      setupAuthListeners();
       return;
     }
   } catch (e) {
-    console.log('Firebase automatic init not available.');
+    console.error('Error al inicializar Firebase:', e);
   }
 
-  alert('Error: La configuración de Firebase no está disponible. Asegúrate de estar corriendo en Firebase Hosting.');
+  alert('Error: No se pudo cargar la configuración de autenticación de Firebase.');
 }
 
 function setupAuthListeners() {
@@ -2119,14 +2118,9 @@ function setupAuthListeners() {
     const dashboardApp = document.getElementById('dashboard-app');
 
     if (user) {
-      if (user.email === 'pinedamillos@gmail.com') {
-        if (loginOverlay) loginOverlay.classList.add('hidden');
-        if (dashboardApp) dashboardApp.classList.remove('hidden');
-        await loadData();
-      } else {
-        alert(`Acceso denegado. La cuenta ${user.email} no tiene permisos para ver esta información.`);
-        await auth.signOut();
-      }
+      if (loginOverlay) loginOverlay.classList.add('hidden');
+      if (dashboardApp) dashboardApp.classList.remove('hidden');
+      await loadData();
     } else {
       if (loginOverlay) loginOverlay.classList.remove('hidden');
       if (dashboardApp) dashboardApp.classList.add('hidden');
