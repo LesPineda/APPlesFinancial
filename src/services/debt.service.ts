@@ -24,6 +24,7 @@ export class DebtService {
     pago_minimo: number;
     fecha_corte: Date;
     fecha_limite_pago: Date;
+    cubierto_por?: string | null;
   }): Promise<Debt> {
     const account = await prisma.account.findUnique({
       where: { id: data.cuenta_id }
@@ -39,7 +40,8 @@ export class DebtService {
         tasa_interes_ea: data.tasa_interes_ea,
         pago_minimo: data.pago_minimo,
         fecha_corte: data.fecha_corte,
-        fecha_limite_pago: data.fecha_limite_pago
+        fecha_limite_pago: data.fecha_limite_pago,
+        cubierto_por: data.cubierto_por || null
       }
     });
   }
@@ -53,6 +55,7 @@ export class DebtService {
       pago_minimo?: number;
       fecha_corte?: Date;
       fecha_limite_pago?: Date;
+      cubierto_por?: string | null;
     }
   ): Promise<Debt> {
     const existing = await prisma.debt.findUnique({

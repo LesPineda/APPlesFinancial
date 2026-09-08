@@ -29,7 +29,7 @@ export class DebtController {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
-      const { cuenta_id, saldo_total, tasa_interes_ea, pago_minimo, fecha_corte, fecha_limite_pago } = req.body;
+      const { cuenta_id, saldo_total, tasa_interes_ea, pago_minimo, fecha_corte, fecha_limite_pago, cubierto_por } = req.body;
 
       if (Number(saldo_total) < 0 || Number(tasa_interes_ea) < 0 || Number(pago_minimo) < 0) {
         throw new AppError(400, 'Los montos y tasas deben ser mayores o iguales a cero.');
@@ -48,7 +48,8 @@ export class DebtController {
         tasa_interes_ea: Number(tasa_interes_ea),
         pago_minimo: Number(pago_minimo),
         fecha_corte: corteDate,
-        fecha_limite_pago: limiteDate
+        fecha_limite_pago: limiteDate,
+        cubierto_por: cubierto_por !== undefined ? String(cubierto_por) : null
       });
 
       return res.status(201).json({ status: 'success', data: debt });
@@ -60,10 +61,11 @@ export class DebtController {
   async update(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
       const { id } = req.params as { id: string };
-      const { cuenta_id, saldo_total, tasa_interes_ea, pago_minimo, fecha_corte, fecha_limite_pago } = req.body;
+      const { cuenta_id, saldo_total, tasa_interes_ea, pago_minimo, fecha_corte, fecha_limite_pago, cubierto_por } = req.body;
 
       const updateData: any = {};
       if (cuenta_id !== undefined) updateData.cuenta_id = cuenta_id;
+      if (cubierto_por !== undefined) updateData.cubierto_por = cubierto_por ? String(cubierto_por) : null;
       if (saldo_total !== undefined) {
         if (Number(saldo_total) < 0) throw new AppError(400, 'El saldo total no puede ser negativo.');
         updateData.saldo_total = Number(saldo_total);

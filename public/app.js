@@ -201,7 +201,7 @@ function renderDebts(prioritizationMethod) {
     const isPaid = Number(debt.saldo_total) <= 0;
     if (isPaid) return;
     
-    const limiteDate = new Date(debt.fecha_limite_pago);
+    const limiteDate = parseLocalDate(debt.fecha_limite_pago);
     limiteDate.setHours(0, 0, 0, 0);
     const diffTime = today.getTime() - limiteDate.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -220,25 +220,198 @@ function renderDebts(prioritizationMethod) {
   // Sort active debts by due date ascending (soonest first)
   const activeDebts = debts
     .filter(d => Number(d.saldo_total) > 0)
-    .sort((a, b) => new Date(a.fecha_limite_pago).getTime() - new Date(b.fecha_limite_pago).getTime());
+    .sort((a, b) => parseLocalDate(a.fecha_limite_pago).getTime() - parseLocalDate(b.fecha_limite_pago).getTime());
   const paidDebts = debts.filter(d => Number(d.saldo_total) <= 0);
 
   // Combine active debts first, then paid debts at the bottom
   let sortedDebts = [...activeDebts, ...paidDebts];
 
-  // Apply Quincena (Fortnight) filter
+  // Calculate Biweekly Income (Cobro / Salario Quincenal vs Cuotas)
+  let totalIncome = 0;
+  let q1Income = 0;
+  let q2Income = 0;
+  let q1IncomeList = [];
+  let q2IncomeList = [];
+
+  transactions.forEach(t => {
+    if (t.tipo === 'INGRESO') {
+      const amount = Number(t.monto);
+      totalIncome += amount;
+      const day = getDueDateDay(t.fecha_transaccion);
+      
+      // Clasificación inteligente de nómina por ciclo de cobro:
+      // - Cobro de Mitad de Mes (Días 15 al 24, ej: Nómina Asistia 18/8) -> Asignado a Q2 (para cuotas del 15 al 31)
+      // - Cobro de Fin / Inicio de Mes (Días 25 al 31 y 1 al 14, ej: Nómina Ortomac 28/8) -> Asignado a Q1 (para cuotas del 1 al 14)
+      if (day >= 15 && day <= 24) {
+        q2Income += amount;
+        q2IncomeList.push({ name: t.descripcion, amount });
+      } else {
+        q1Income += amount;
+        q1IncomeList.push({ name: t.descripcion, amount });
+      }
+    }
+  });
+
+  // Fallback: If no specific Q1/Q2 income transactions exist, split total income equally
+  if (q1Income === 0 && q2Income === 0 && totalIncome > 0) {
+    q1Income = totalIncome / 2;
+    q2Income = totalIncome / 2;
+  }
+
+  // Allow custom override if stored in local storage
+  const savedIncome = localStorage.getItem('apples_custom_quincena_income');
+  const userQuincenaSalary = savedIncome ? Number(savedIncome) : 2500000;
+
+  const effectiveQ1Income = q1Income > 0 ? q1Income : userQuincenaSalary;
+  const effectiveQ2Income = q2Income > 0 ? q2Income : userQuincenaSalary;
+
+  const q1IncomeDetailText = q1IncomeList.length > 0
+    ? q1IncomeList.map(i => `<strong>${i.name}</strong> ($${formatMoney(i.amount)})`).join(' + ')
+    : `Cobro Estimado Q1 ($${formatMoney(effectiveQ1Income)})`;
+
+  const q2IncomeDetailText = q2IncomeList.length > 0
+    ? q2IncomeList.map(i => `<strong>${i.name}</strong> ($${formatMoney(i.amount)})`).join(' + ')
+    : `Cobro Estimado Q2 ($${formatMoney(effectiveQ2Income)})`;
+
+  const q1Debts = activeDebts.filter(d => {
+    const dueDay = getDueDateDay(d.fecha_limite_pago);
+    return dueDay >= 1 && dueDay <= 14;
+  });
+
+  const q2Debts = activeDebts.filter(d => {
+    const dueDay = getDueDateDay(d.fecha_limite_pago);
+    return dueDay >= 15 && dueDay <= 31;
+  });
+
+  const getDebtRequiredAmount = (d) => {
+    const isPaid = Number(d.saldo_total) <= 0;
+    if (isPaid) return 0;
+    if (d.cubierto_por && String(d.cubierto_por).trim() !== '') return 0; // Cubierto por tercero = $0 sueldo de nómina
+    
+    const limiteDate = parseLocalDate(d.fecha_limite_pago);
+    limiteDate.setHours(0, 0, 0, 0);
+    const diffTime = today.getTime() - limiteDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const isOverdue = diffDays > 0;
+    
+    if (isOverdue) {
+      const cuotasVencidas = Math.max(1, Math.ceil(diffDays / 30));
+      return cuotasVencidas * Number(d.pago_minimo);
+    }
+    return Number(d.pago_minimo);
+  };
+
+  const totalQ1Cuotas = q1Debts.reduce((sum, d) => sum + getDebtRequiredAmount(d), 0);
+  const totalQ2Cuotas = q2Debts.reduce((sum, d) => sum + getDebtRequiredAmount(d), 0);
+
+  let quincenaCoverageHTML = '';
+
   if (currentDebtFilter === 'q1') {
-    // Only show active debts due between days 1 and 14
-    sortedDebts = activeDebts.filter(d => {
-      const dueDay = new Date(d.fecha_limite_pago).getDate();
-      return dueDay >= 1 && dueDay <= 14;
-    });
+    const diffQ1 = effectiveQ1Income - totalQ1Cuotas;
+    const isCoveredQ1 = diffQ1 >= 0;
+
+    quincenaCoverageHTML = `
+      <div class="quincena-attention-card ${isCoveredQ1 ? 'covered' : 'shortage'}">
+        <div class="quincena-attention-header">
+          <span class="quincena-badge ${isCoveredQ1 ? 'bg-success' : 'bg-danger'}">
+            <i class="fa-solid ${isCoveredQ1 ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i>
+            ${isCoveredQ1 ? 'Q1 CUBIERTA CON TU NÓMINA' : 'ATENCIÓN Q1 - FALTANTE EN NÓMINA'}
+          </span>
+          <div class="quincena-income-input-wrapper" style="font-size:0.75rem; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem;">
+            <span>Mi cobro Q1 ($):</span>
+            <input type="number" id="input-q1-income" value="${effectiveQ1Income}" step="50000" style="width:110px; padding:2px 6px; font-size:0.75rem; height:24px; border-radius:6px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff; font-weight:700;">
+          </div>
+        </div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.6rem;">
+          <i class="fa-solid fa-money-bill-wave text-success"></i> Asignado de tu cobro: ${q1IncomeDetailText}
+        </div>
+        <div class="quincena-stats-grid">
+          <div class="quincena-stat-item">
+            <span class="stat-label">💵 Cobro / Nómina Q1:</span>
+            <span class="stat-value text-primary">$${formatMoney(effectiveQ1Income)}</span>
+          </div>
+          <div class="quincena-stat-item">
+            <span class="stat-label">💳 Requerido Q1 (Ponerse Al Día):</span>
+            <span class="stat-value text-warning">$${formatMoney(totalQ1Cuotas)}</span>
+          </div>
+          <div class="quincena-stat-item">
+            <span class="stat-label">${isCoveredQ1 ? 'Sobrante de tu sueldo Q1:' : 'Faltante Real Q1:'}</span>
+            <span class="stat-value ${isCoveredQ1 ? 'text-success' : 'text-danger'}">
+              ${isCoveredQ1 ? '+' : '-'}$${formatMoney(Math.abs(diffQ1))}
+            </span>
+          </div>
+        </div>
+        <p class="quincena-diagnostic-msg">
+          ${isCoveredQ1 
+            ? `🟢 <strong>¡Tu nómina alcanza!</strong> Con tu cobro (${q1IncomeDetailText}), pagas todas las cuotas de Q1 ($${formatMoney(totalQ1Cuotas)}) y te quedan <strong style="color:#10b981;">+$${formatMoney(diffQ1)} libres</strong>.` 
+            : `🔴 <strong>¡Atención al cobrar!</strong> Para ponerte 100% al día en Q1 necesitas $${formatMoney(totalQ1Cuotas)}. Con tu cobro (${q1IncomeDetailText}), te faltan <strong style="color:#ef4444;">-$${formatMoney(Math.abs(diffQ1))}</strong> de tu sueldo.`}
+        </p>
+      </div>
+    `;
   } else if (currentDebtFilter === 'q2') {
-    // Only show active debts due between days 15 and 31
-    sortedDebts = activeDebts.filter(d => {
-      const dueDay = new Date(d.fecha_limite_pago).getDate();
-      return dueDay >= 15 && dueDay <= 31;
-    });
+    const diffQ2 = effectiveQ2Income - totalQ2Cuotas;
+    const isCoveredQ2 = diffQ2 >= 0;
+
+    quincenaCoverageHTML = `
+      <div class="quincena-attention-card ${isCoveredQ2 ? 'covered' : 'shortage'}">
+        <div class="quincena-attention-header">
+          <span class="quincena-badge ${isCoveredQ2 ? 'bg-success' : 'bg-danger'}">
+            <i class="fa-solid ${isCoveredQ2 ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i>
+            ${isCoveredQ2 ? 'Q2 CUBIERTA CON TU NÓMINA' : 'ATENCIÓN Q2 - FALTANTE EN NÓMINA'}
+          </span>
+          <div class="quincena-income-input-wrapper" style="font-size:0.75rem; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem;">
+            <span>Mi cobro Q2 ($):</span>
+            <input type="number" id="input-q2-income" value="${effectiveQ2Income}" step="50000" style="width:110px; padding:2px 6px; font-size:0.75rem; height:24px; border-radius:6px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff; font-weight:700;">
+          </div>
+        </div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.6rem;">
+          <i class="fa-solid fa-money-bill-wave text-success"></i> Asignado de tu cobro: ${q2IncomeDetailText}
+        </div>
+        <div class="quincena-stats-grid">
+          <div class="quincena-stat-item">
+            <span class="stat-label">💵 Cobro / Nómina Q2:</span>
+            <span class="stat-value text-primary">$${formatMoney(effectiveQ2Income)}</span>
+          </div>
+          <div class="quincena-stat-item">
+            <span class="stat-label">💳 Cuotas Requeridas Q2 (15-31):</span>
+            <span class="stat-value text-warning">$${formatMoney(totalQ2Cuotas)}</span>
+          </div>
+          <div class="quincena-stat-item">
+            <span class="stat-label">${isCoveredQ2 ? 'Sobrante de tu sueldo Q2:' : 'Faltante de tu sueldo Q2:'}</span>
+            <span class="stat-value ${isCoveredQ2 ? 'text-success' : 'text-danger'}">
+              ${isCoveredQ2 ? '+' : '-'}$${formatMoney(Math.abs(diffQ2))}
+            </span>
+          </div>
+        </div>
+        <p class="quincena-diagnostic-msg">
+          ${isCoveredQ2 
+            ? `🟢 <strong>¡Tu nómina alcanza!</strong> Con tu cobro (${q2IncomeDetailText}), pagas todas las cuotas del 15 al 31 ($${formatMoney(totalQ2Cuotas)}) y te quedan <strong style="color:#10b981;">+$${formatMoney(diffQ2)} libres</strong>.` 
+            : `🔴 <strong>¡Atención al cobrar!</strong> Con tu cobro de esta quincena (${q2IncomeDetailText}), no alcanzas a pagar las cuotas del 15 al 31 ($${formatMoney(totalQ2Cuotas)}). Te faltan <strong style="color:#ef4444;">-$${formatMoney(Math.abs(diffQ2))}</strong> de tu sueldo.`}
+        </p>
+      </div>
+    `;
+  } else {
+    // 'all' filter summary
+    const diffQ1 = effectiveQ1Income - totalQ1Cuotas;
+    const diffQ2 = effectiveQ2Income - totalQ2Cuotas;
+    quincenaCoverageHTML = `
+      <div class="quincena-attention-card summary">
+        <div class="quincena-stats-grid">
+          <div class="quincena-stat-item">
+            <span class="stat-label">📆 Q1 (Cobro $${formatMoney(effectiveQ1Income)}):</span>
+            <span class="stat-value ${diffQ1 >= 0 ? 'text-success' : 'text-danger'}">
+              Cuotas: $${formatMoney(totalQ1Cuotas)} (${diffQ1 >= 0 ? '+$' + formatMoney(diffQ1) + ' libre' : '-$' + formatMoney(Math.abs(diffQ1)) + ' falta'})
+            </span>
+          </div>
+          <div class="quincena-stat-item">
+            <span class="stat-label">📆 Q2 (Cobro $${formatMoney(effectiveQ2Income)}):</span>
+            <span class="stat-value ${diffQ2 >= 0 ? 'text-success' : 'text-danger'}">
+              Cuotas: $${formatMoney(totalQ2Cuotas)} (${diffQ2 >= 0 ? '+$' + formatMoney(diffQ2) + ' libre' : '-$' + formatMoney(Math.abs(diffQ2)) + ' falta'})
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   const alertBanner = overdueCount > 0 ? `
@@ -256,10 +429,31 @@ function renderDebts(prioritizationMethod) {
     </div>
   `;
 
+  // Apply Quincena (Fortnight) filter strictly
+  sortedDebts = [...activeDebts, ...paidDebts];
+
+  if (currentDebtFilter === 'q1') {
+    // Only show active debts due between days 1 and 14
+    sortedDebts = activeDebts.filter(d => {
+      const dueDay = getDueDateDay(d.fecha_limite_pago);
+      return dueDay >= 1 && dueDay <= 14;
+    });
+  } else if (currentDebtFilter === 'q2') {
+    // Only show active debts due between days 15 and 31
+    sortedDebts = activeDebts.filter(d => {
+      const dueDay = getDueDateDay(d.fecha_limite_pago);
+      return dueDay >= 15 && dueDay <= 31;
+    });
+  }
+
   if (sortedDebts.length === 0) {
-    container.innerHTML = alertBanner + `<div class="loading-spinner">No hay deudas programadas para esta quincena</div>`;
+    container.innerHTML = alertBanner + quincenaCoverageHTML + `<div class="loading-spinner">No hay deudas programadas para esta quincena</div>`;
     return;
   }
+
+  let payrollTracker = currentDebtFilter === 'q1' 
+    ? effectiveQ1Income 
+    : (currentDebtFilter === 'q2' ? effectiveQ2Income : effectiveQ1Income + effectiveQ2Income);
 
   const debtItemsHTML = sortedDebts.map((debt) => {
     const acc = accounts.find(a => a.id === debt.cuenta_id);
@@ -267,7 +461,7 @@ function renderDebts(prioritizationMethod) {
 
     // Calculate overdue status and estimated overdue installments
     const isPaid = Number(debt.saldo_total) <= 0;
-    const limiteDate = new Date(debt.fecha_limite_pago);
+    const limiteDate = parseLocalDate(debt.fecha_limite_pago);
     limiteDate.setHours(0, 0, 0, 0);
     const diffTime = today.getTime() - limiteDate.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -276,6 +470,68 @@ function renderDebts(prioritizationMethod) {
     // Estimate overdue installments: 1 month per ~30 days overdue
     const cuotasVencidas = isOverdue ? Math.max(1, Math.ceil(diffDays / 30)) : 0;
     const montoMora = isOverdue ? cuotasVencidas * Number(debt.pago_minimo) : 0;
+    const cuotaVal = Number(debt.pago_minimo);
+
+    // Calculate exact number of installments covered by the biweekly payroll
+    let individualCoverageBadge = '';
+    if (!isPaid) {
+      if (debt.cubierto_por && String(debt.cubierto_por).trim() !== '') {
+        individualCoverageBadge = `
+          <span class="badge-covered-other" title="Pago o cuota cubierta por otra persona (${escapeHTML(debt.cubierto_por)})">
+            <i class="fa-solid fa-users-rectangle"></i> CUBIERTO POR: ${escapeHTML(debt.cubierto_por.toUpperCase())}
+          </span>
+        `;
+      } else if (isOverdue) {
+        // Evaluate multi-cuota coverage for overdue debts
+        const cuotasCovered = Math.floor(payrollTracker / cuotaVal);
+        if (cuotasCovered >= cuotasVencidas) {
+          payrollTracker -= (cuotasVencidas * cuotaVal);
+          individualCoverageBadge = `
+            <span class="badge-covered-ok" title="Tu nómina cubre el 100% de las ${cuotasVencidas} cuotas vencidas ($${formatMoney(montoMora)})">
+              <i class="fa-solid fa-circle-check"></i> CUBRE LAS ${cuotasVencidas} CUOTAS ($${formatMoney(montoMora)})
+            </span>
+          `;
+        } else if (cuotasCovered > 0) {
+          payrollTracker -= (cuotasCovered * cuotaVal);
+          const faltanCuotas = cuotasVencidas - cuotasCovered;
+          individualCoverageBadge = `
+            <span class="badge-covered-partial" title="Tu nómina cubre ${cuotasCovered} de las ${cuotasVencidas} cuotas vencidas">
+              <i class="fa-solid fa-circle-half-stroke"></i> CUBRE ${cuotasCovered} DE ${cuotasVencidas} CUOTAS (Faltan ${faltanCuotas} cuota${faltanCuotas > 1 ? 's' : ''})
+            </span>
+          `;
+        } else {
+          individualCoverageBadge = `
+            <span class="badge-covered-none" title="Tu nómina de esta quincena ya no alcanza para pagar 1 cuota de esta deuda">
+              <i class="fa-solid fa-circle-xmark"></i> NÓMINA NO ALCANZA PARA 1 CUOTA
+            </span>
+          `;
+        }
+      } else {
+        // Regular 1-cuota coverage for current debts
+        if (payrollTracker >= cuotaVal) {
+          payrollTracker -= cuotaVal;
+          individualCoverageBadge = `
+            <span class="badge-covered-ok" title="Tu nómina cubre la cuota del mes ($${formatMoney(cuotaVal)})">
+              <i class="fa-solid fa-circle-check"></i> CUBRE 1 CUOTA ($${formatMoney(cuotaVal)})
+            </span>
+          `;
+        } else if (payrollTracker > 0) {
+          const shortage = cuotaVal - payrollTracker;
+          payrollTracker = 0;
+          individualCoverageBadge = `
+            <span class="badge-covered-partial" title="Tu nómina cubre solo una parte de la cuota">
+              <i class="fa-solid fa-circle-half-stroke"></i> PARCIAL (Faltan $${formatMoney(shortage)})
+            </span>
+          `;
+        } else {
+          individualCoverageBadge = `
+            <span class="badge-covered-none" title="Tu nómina de esta quincena ya se agotó y no cubre esta cuota">
+              <i class="fa-solid fa-circle-xmark"></i> SIN COBERTURA EN NÓMINA
+            </span>
+          `;
+        }
+      }
+    }
 
     // Calculate if it is due soon (within the next 7 days)
     const timeUntilDue = limiteDate.getTime() - today.getTime();
@@ -354,6 +610,7 @@ function renderDebts(prioritizationMethod) {
               ${escapeHTML(accountName)}
               ${categoryBadge}
               ${fortnightBadge}
+              ${individualCoverageBadge}
               ${badge}
               ${overdueBadge}
             </h4>
@@ -365,6 +622,9 @@ function renderDebts(prioritizationMethod) {
           <div class="item-value" style="${isOverdue ? 'color: #fda4af;' : ''}">$${formatMoney(debt.saldo_total)}</div>
           <div class="debt-rate" title="Tasa Efectiva Anual">${debt.tasa_interes_ea}% E.A.</div>
           <div class="item-actions">
+            <button class="btn-action-small cover-other-btn ${debt.cubierto_por ? 'active-covered' : ''}" data-id="${debt.id}" title="${debt.cubierto_por ? 'Cubierto por: ' + escapeHTML(debt.cubierto_por) + ' (haz clic para editar)' : 'Marcar como cubierto por otra persona'}">
+              <i class="fa-solid fa-users-rectangle pointer-events-none"></i>
+            </button>
             <button class="btn-action-small pay-debt-btn" data-id="${debt.id}" title="Abonar 1 cuota ($${formatMoney(debt.pago_minimo)}) y avanzar 1 mes">
               <i class="fa-solid fa-money-check-dollar pointer-events-none"></i>
             </button>
@@ -382,7 +642,7 @@ function renderDebts(prioritizationMethod) {
       </div>
     `;
   }).join('');
-  container.innerHTML = alertBanner + debtItemsHTML;
+  container.innerHTML = alertBanner + quincenaCoverageHTML + debtItemsHTML;
 }
 
 let selectedOptDebtIds = new Set(); // Track user checked debts for budget calculation
@@ -1288,6 +1548,7 @@ function setupEventListeners() {
     const pago_minimo = document.getElementById('debt-pago').value;
     const fecha_corte = document.getElementById('debt-corte').value;
     const fecha_limite_pago = document.getElementById('debt-limite').value;
+    const cubierto_por_val = document.getElementById('debt-cubierto-por') ? document.getElementById('debt-cubierto-por').value.trim() : '';
 
     try {
       const res = await fetch(`${API_BASE}/debts`, {
@@ -1299,7 +1560,8 @@ function setupEventListeners() {
           tasa_interes_ea,
           pago_minimo,
           fecha_corte,
-          fecha_limite_pago
+          fecha_limite_pago,
+          cubierto_por: cubierto_por_val !== '' ? cubierto_por_val : null
         })
       });
       const data = await res.json();
@@ -1346,45 +1608,48 @@ function setupEventListeners() {
   });
 
   // Webhook Simulator submit
-  document.getElementById('form-webhook').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const feedback = document.getElementById('webhook-feedback');
-    const cuenta_nombre = document.getElementById('web-cuenta').value;
-    const tipo = document.getElementById('web-tipo').value;
-    const monto = document.getElementById('web-monto').value;
-    const descripcion = document.getElementById('web-descripcion').value;
+  const webhookForm = document.getElementById('form-webhook');
+  if (webhookForm) {
+    webhookForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const feedback = document.getElementById('webhook-feedback');
+      const cuenta_nombre = document.getElementById('web-cuenta').value;
+      const tipo = document.getElementById('web-tipo').value;
+      const monto = document.getElementById('web-monto').value;
+      const descripcion = document.getElementById('web-descripcion').value;
 
-    feedback.className = 'feedback-msg hidden';
-    feedback.innerText = '';
+      feedback.className = 'feedback-msg hidden';
+      feedback.innerText = '';
 
-    try {
-      const res = await fetch(`${API_BASE}/webhooks/transactions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cuenta_nombre,
-          monto: Number(monto),
-          tipo,
-          fecha: new Date().toISOString(),
-          descripcion
-        })
-      });
+      try {
+        const res = await fetch(`${API_BASE}/webhooks/transactions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cuenta_nombre,
+            monto: Number(monto),
+            tipo,
+            fecha: new Date().toISOString(),
+            descripcion
+          })
+        });
 
-      const data = await res.json();
-      if (data.status === 'success') {
-        feedback.className = 'feedback-msg success';
-        feedback.innerText = `Éxito: Transacción registrada. Cuenta ${cuenta_nombre} actualizada.`;
-        document.getElementById('form-webhook').reset();
-        await loadData();
-      } else {
+        const data = await res.json();
+        if (data.status === 'success') {
+          feedback.className = 'feedback-msg success';
+          feedback.innerText = `Éxito: Transacción registrada. Cuenta ${cuenta_nombre} actualizada.`;
+          webhookForm.reset();
+          await loadData();
+        } else {
+          feedback.className = 'feedback-msg error';
+          feedback.innerText = `Error: ${data.message || 'Error en el servidor.'}`;
+        }
+      } catch (err) {
         feedback.className = 'feedback-msg error';
-        feedback.innerText = `Error: ${data.message || 'Error en el servidor.'}`;
+        feedback.innerText = 'Error al enviar webhook al backend.';
       }
-    } catch (err) {
-      feedback.className = 'feedback-msg error';
-      feedback.innerText = 'Error al enviar webhook al backend.';
-    }
-  });
+    });
+  }
 
   // Change Prioritization Method
   const methodSelect = document.getElementById('select-method');
@@ -1413,6 +1678,17 @@ function setupEventListeners() {
     filterQ1.addEventListener('click', () => setFilter('q1', filterQ1, [filterAll, filterQ2]));
     filterQ2.addEventListener('click', () => setFilter('q2', filterQ2, [filterAll, filterQ1]));
   }
+
+  // Live input listener for biweekly income adjustment
+  document.addEventListener('input', (e) => {
+    if (e.target.id === 'input-q1-income' || e.target.id === 'input-q2-income') {
+      const val = Number(e.target.value);
+      if (!isNaN(val) && val >= 0) {
+        localStorage.setItem('apples_custom_quincena_income', val);
+        renderDebts();
+      }
+    }
+  });
 
   // Checkbox selection event in Optimization Plan
   const optListContainer = document.getElementById('optimization-plan-list');
@@ -1475,6 +1751,13 @@ function setupEventListeners() {
     if (payBtn) {
       const id = payBtn.dataset.id;
       await payDebtInstallment(id);
+      return;
+    }
+
+    const coverOtherBtn = e.target.closest('.cover-other-btn');
+    if (coverOtherBtn) {
+      const id = coverOtherBtn.dataset.id;
+      await promptCoveredByOther(id);
       return;
     }
 
@@ -1613,12 +1896,48 @@ function openEditDebtModal(id) {
   document.getElementById('edit-debt-nombre').value = debt.cuenta ? debt.cuenta.nombre : 'Deuda';
   document.getElementById('edit-debt-saldo').value = Number(debt.saldo_total);
   document.getElementById('edit-debt-pago').value = Number(debt.pago_minimo);
+  if (document.getElementById('edit-debt-cubierto-por')) {
+    document.getElementById('edit-debt-cubierto-por').value = debt.cubierto_por || '';
+  }
 
-  const limitDate = new Date(debt.fecha_limite_pago);
+  const limitDate = parseLocalDate(debt.fecha_limite_pago);
   const dateStr = limitDate.toISOString().split('T')[0];
   document.getElementById('edit-debt-limite').value = dateStr;
 
   document.getElementById('edit-debt-modal').classList.remove('hidden');
+}
+
+async function promptCoveredByOther(id) {
+  const debt = debts.find(d => d.id === id);
+  if (!debt) return;
+
+  const currentCovered = debt.cubierto_por || '';
+  const debtName = debt.cuenta ? debt.cuenta.nombre : 'esta deuda';
+  const val = prompt(
+    `Indica quién cubrió o pagará la cuota/deuda de "${debtName}" (Ej: Esposa, Mamá, Empresa):\n\n(Deja en blanco y pulsa Aceptar para quitar la marca de tercero):`,
+    currentCovered
+  );
+
+  if (val === null) return; // Cancelado
+
+  try {
+    const res = await fetch(`${API_BASE}/debts/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cubierto_por: val.trim() !== '' ? val.trim() : null
+      })
+    });
+
+    const data = await res.json();
+    if (data.status === 'success') {
+      await loadData();
+    } else {
+      alert(`Error al actualizar cobertura: ${data.message}`);
+    }
+  } catch (err) {
+    alert('Error al conectar con el servidor.');
+  }
 }
 
 function setupEditDebtForm() {
@@ -1644,6 +1963,9 @@ function setupEditDebtForm() {
       const saldo_total = Number(document.getElementById('edit-debt-saldo').value);
       const pago_minimo = Number(document.getElementById('edit-debt-pago').value);
       const fecha_limite_pago = document.getElementById('edit-debt-limite').value;
+      const cubierto_por = document.getElementById('edit-debt-cubierto-por') 
+        ? document.getElementById('edit-debt-cubierto-por').value.trim() 
+        : '';
 
       try {
         const res = await fetch(`${API_BASE}/debts/${id}`, {
@@ -1652,7 +1974,8 @@ function setupEditDebtForm() {
           body: JSON.stringify({
             saldo_total,
             pago_minimo,
-            fecha_limite_pago
+            fecha_limite_pago,
+            cubierto_por: cubierto_por !== '' ? cubierto_por : null
           })
         });
 
@@ -1788,8 +2111,25 @@ function formatDate(dateStr) {
   });
 }
 
+function parseLocalDate(dateStr) {
+  if (!dateStr) return new Date();
+  if (typeof dateStr === 'string' && dateStr.includes('-')) {
+    const parts = dateStr.split('T')[0].split('-');
+    if (parts.length === 3) {
+      return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    }
+  }
+  return new Date(dateStr);
+}
+
+function getDueDateDay(dateStr) {
+  if (!dateStr) return 1;
+  const localDate = parseLocalDate(dateStr);
+  return localDate.getDate();
+}
+
 function formatDateOnly(dateStr) {
-  const date = new Date(dateStr);
+  const date = parseLocalDate(dateStr);
   return date.toLocaleDateString('es-CO', {
     day: '2-digit',
     month: 'short'
