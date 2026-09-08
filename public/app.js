@@ -1,7 +1,5 @@
 // Frontend Logic for APPles Financial Dashboard
-const API_BASE = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1') 
-  ? 'http://localhost:3000/api' 
-  : '/api';
+const API_BASE = `${window.location.origin}/api`;
 
 const API_SECRET_KEY = 'apples_fin_sec_key_2026_x89';
 
@@ -38,10 +36,7 @@ async function checkAPIStatus() {
   const text = document.getElementById('api-status');
   
   try {
-    const healthUrl = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
-      ? 'http://localhost:3000/health'
-      : '/health';
-    const res = await fetch(healthUrl);
+    const res = await fetch(`${window.location.origin}/health`);
     if (res.ok) {
       indicator.className = 'status-indicator online';
       text.innerText = 'Backend Conectado';
@@ -67,10 +62,12 @@ async function fetchAccounts() {
     const res = await fetch(`${API_BASE}/accounts`);
     const data = await res.json();
     if (data.status === 'success') {
-      accounts = data.data;
+      accounts = data.data || [];
       renderAccounts();
       populateAccountSelects();
       renderCashFlowReport();
+    } else {
+      container.innerHTML = `<div class="loading-spinner">Error: ${escapeHTML(data.message || 'No se cargaron cuentas')}</div>`;
     }
   } catch (err) {
     container.innerHTML = `<div class="loading-spinner">Error al conectar con cuentas</div>`;
@@ -83,9 +80,11 @@ async function fetchTransactions() {
     const res = await fetch(`${API_BASE}/transactions`);
     const data = await res.json();
     if (data.status === 'success') {
-      transactions = data.data;
+      transactions = data.data || [];
       renderTransactions();
       renderCashFlowReport();
+    } else {
+      container.innerHTML = `<div class="loading-spinner">Error: ${escapeHTML(data.message || 'No se cargaron movimientos')}</div>`;
     }
   } catch (err) {
     container.innerHTML = `<div class="loading-spinner">Error al conectar con movimientos</div>`;
@@ -101,11 +100,13 @@ async function fetchDebts() {
     const res = await fetch(`${API_BASE}/debts`);
     const data = await res.json();
     if (data.status === 'success') {
-      debts = data.data;
+      debts = data.data || [];
       renderDebts();
       renderOptimizationPlan(method);
       populateDebtSelect();
       renderCashFlowReport();
+    } else {
+      container.innerHTML = `<div class="loading-spinner">Error: ${escapeHTML(data.message || 'No se cargaron deudas')}</div>`;
     }
   } catch (err) {
     container.innerHTML = `<div class="loading-spinner">Error al conectar con deudas</div>`;
