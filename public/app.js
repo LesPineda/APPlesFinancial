@@ -1537,9 +1537,49 @@ function setupMobileTabs() {
   });
 }
 
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const installBtn = document.getElementById('btn-install-pwa');
+  if (installBtn) {
+    installBtn.style.display = 'inline-flex';
+  }
+});
+
+function setupPWAInstallButton() {
+  const installBtn = document.getElementById('btn-install-pwa');
+  if (!installBtn) return;
+
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isStandalone) {
+    installBtn.style.display = 'none';
+    return;
+  }
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installBtn.style.display = 'none';
+      }
+      deferredPrompt = null;
+    } else if (isIOS) {
+      alert('📱 Para instalar APPles Financial en tu iPhone / iPad:\n\n1. Toca el botón Compartir en Safari (el ícono con una flecha hacia arriba ⎋).\n2. Selecciona "Agregar a inicio" (+).');
+    } else {
+      alert('📱 Para instalar la aplicación en tu celular:\n\n1. Toca el menú de opciones de tu navegador (los 3 puntos ⋮ arriba a la derecha).\n2. Selecciona "Instalar aplicación" o "Agregar a la pantalla principal".');
+    }
+  });
+}
+
 // 5. Setup Events Listeners
 function setupEventListeners() {
   setupMobileTabs();
+  setupPWAInstallButton();
 
   // Toggle Samsung S25 Plus Mobile View Simulation
   const simBtn = document.getElementById('btn-toggle-sim-mobile');

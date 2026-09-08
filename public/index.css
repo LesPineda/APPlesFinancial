@@ -1277,6 +1277,28 @@ select option {
   border-color: rgba(59, 130, 246, 0.5) !important;
 }
 
+/* PWA Installation Button */
+.btn-install-pwa {
+  background: linear-gradient(135deg, var(--accent), #059669);
+  color: #ffffff;
+  border: none;
+  padding: 0.4rem 0.85rem;
+  border-radius: 10px;
+  font-family: var(--font-family);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 0 12px var(--accent-glow);
+  transition: var(--transition);
+}
+.btn-install-pwa:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
 /* Samsung S25 Plus Simulator Mode on Desktop */
 .btn-sim-mobile {
   background: rgba(139, 92, 246, 0.15);

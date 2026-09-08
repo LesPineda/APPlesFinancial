@@ -22,7 +22,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" type="image/png" href="icon-192.png">
-  <link rel="stylesheet" href="index.css?v=35">
+  <link rel="stylesheet" href="index.css?v=40">
 </head>
 <body>
   <!-- Ambient Background Glows -->
@@ -45,6 +45,9 @@
         <div class="header-status">
           <span class="status-indicator online"></span>
           <span id="api-status">Conectando...</span>
+          <button id="btn-install-pwa" class="btn-install-pwa" title="Instalar APPles Financial en tu celular">
+            <i class="fa-solid fa-download"></i> <span>Instalar App</span>
+          </button>
           <button id="btn-toggle-sim-mobile" class="btn-sim-mobile" title="Simular Vista Celular (Samsung S25 Plus)">
             <i class="fa-solid fa-mobile-screen-button"></i> <span>Vista Celular</span>
           </button>
@@ -388,7 +391,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=35"></script>
+  <script src="app.js?v=40"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
