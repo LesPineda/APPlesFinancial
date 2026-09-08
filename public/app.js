@@ -1507,8 +1507,50 @@ function populateDebtSelect() {
   }
 }
 
+function setupMobileTabs() {
+  const tabs = document.querySelectorAll('.mobile-nav-tabs .nav-tab');
+  const cols = document.querySelectorAll('.dashboard-grid .grid-col');
+
+  if (!tabs.length) return;
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.getAttribute('data-target');
+      
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      if (target === 'col-all') {
+        cols.forEach(c => c.classList.remove('mobile-hidden'));
+      } else {
+        cols.forEach(c => {
+          if (c.classList.contains(target)) {
+            c.classList.remove('mobile-hidden');
+          } else {
+            c.classList.add('mobile-hidden');
+          }
+        });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+}
+
 // 5. Setup Events Listeners
 function setupEventListeners() {
+  setupMobileTabs();
+
+  // Toggle Samsung S25 Plus Mobile View Simulation
+  const simBtn = document.getElementById('btn-toggle-sim-mobile');
+  if (simBtn) {
+    simBtn.addEventListener('click', () => {
+      document.body.classList.toggle('device-sim-active');
+      simBtn.classList.toggle('active');
+      const isSim = document.body.classList.contains('device-sim-active');
+      simBtn.querySelector('span').textContent = isSim ? 'Vista Desktop' : 'Vista Celular';
+    });
+  }
+
   // Toggle Forms
   setupFormToggle('btn-show-add-account', 'form-add-account', 'btn-cancel-account');
   setupFormToggle('btn-show-add-debt', 'form-add-debt', 'btn-cancel-debt');

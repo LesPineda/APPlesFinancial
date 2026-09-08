@@ -125,6 +125,58 @@ body {
   box-shadow: 0 0 8px var(--accent);
 }
 
+/* Mobile Navigation Tabs */
+.mobile-nav-tabs {
+  display: none;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  padding: 0.35rem;
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.mobile-nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+.nav-tab {
+  flex: 1;
+  min-width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.55rem 0.5rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-family);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.nav-tab i {
+  font-size: 1rem;
+}
+.nav-tab:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.04);
+}
+.nav-tab.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(59, 130, 246, 0.25));
+  color: #ffffff;
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+}
+
 /* Dashboard Grid Layout (4 Columns) */
 .dashboard-grid {
   display: grid;
@@ -139,13 +191,56 @@ body {
   }
 }
 @media (max-width: 850px) {
+  .app-container {
+    padding: 0.75rem;
+  }
+  .mobile-nav-tabs {
+    display: flex;
+  }
   .dashboard-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .grid-col.mobile-hidden {
+    display: none !important;
   }
   .app-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+  }
+  .header-brand {
+    gap: 0.75rem;
+  }
+  .brand-logo {
+    font-size: 1.8rem;
+  }
+  .header-brand h1 {
+    font-size: 1.35rem;
+  }
+  .brand-tagline {
+    font-size: 0.75rem;
+  }
+  .header-status {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.4rem 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    padding: 0.5rem;
+  }
+  .glass-card {
+    padding: 0.95rem;
+    border-radius: 18px;
+    margin-bottom: 1rem;
+  }
+  .header-brand h1 {
+    font-size: 1.2rem;
   }
 }
 
@@ -221,9 +316,36 @@ body {
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.08);
 }
-.debt-filters button.active {
-  background: var(--primary) !important;
-  color: #fff !important;
+.debt-filters {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.debt-filters::-webkit-scrollbar {
+  display: none;
+}
+.btn-filter {
+  font-size: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-filter:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+}
+.btn-filter.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover)) !important;
+  color: #ffffff !important;
   border-color: var(--primary) !important;
   box-shadow: 0 0 10px var(--primary-glow);
 }
@@ -413,8 +535,6 @@ select option {
   font-size: 0.95rem;
   font-weight: 700;
   white-space: nowrap;
-}
-  font-weight: 700;
 }
 .debt-rate {
   font-size: 0.75rem;
@@ -624,24 +744,40 @@ select option {
 /* Item Action Overlay */
 .item-actions {
   display: flex;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.5rem;
   margin-top: 0.25rem;
-  opacity: 0;
+  opacity: 0.85;
   transition: var(--transition);
 }
 .account-item:hover .item-actions, .debt-item:hover .item-actions, .transaction-item:hover .item-actions {
   opacity: 1;
 }
+
+@media (hover: none), (max-width: 850px) {
+  .item-actions {
+    opacity: 1 !important;
+  }
+}
+
 .btn-action-small {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
   cursor: pointer;
   color: var(--text-muted);
-  font-size: 0.8rem;
-  padding: 0.2rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: var(--transition);
+  min-width: 32px;
+  min-height: 32px;
 }
-.btn-action-small:hover {
+.btn-action-small:hover, .btn-action-small:active {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
   color: var(--danger);
 }
 
@@ -1116,6 +1252,70 @@ select option {
   background: rgba(59, 130, 246, 0.25) !important;
   color: #60a5fa !important;
   border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Samsung S25 Plus Simulator Mode on Desktop */
+.btn-sim-mobile {
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #c084fc;
+  padding: 0.4rem 0.85rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: var(--transition);
+}
+.btn-sim-mobile:hover, .btn-sim-mobile.active {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+
+body.device-sim-active {
+  background: #030712;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+body.device-sim-active .app-container {
+  max-width: 412px;
+  width: 412px;
+  min-height: 880px;
+  margin: 0 auto;
+  border: 12px solid #1f2937;
+  border-radius: 42px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 0 2px rgba(139, 92, 246, 0.3);
+  padding: 0.85rem;
+  position: relative;
+  background: var(--bg-dark);
+  overflow-x: hidden;
+}
+
+body.device-sim-active .mobile-nav-tabs {
+  display: flex !important;
+}
+
+body.device-sim-active .dashboard-grid {
+  grid-template-columns: 1fr !important;
+  gap: 1rem !important;
+}
+
+body.device-sim-active .app-header {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.75rem !important;
+  padding: 0.85rem 1rem !important;
+}
+
+body.device-sim-active .item-actions {
+  opacity: 1 !important;
 }
 
 

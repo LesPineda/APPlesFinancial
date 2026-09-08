@@ -29,8 +29,8 @@ app.use(errorHandler);
 
 // Iniciar servidor
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
+  app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log(`🚀 Servidor ejecutándose en http://0.0.0.0:${PORT} (accesible en red local e IP)`);
   });
 }
 
