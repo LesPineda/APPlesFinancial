@@ -22,8 +22,21 @@ let debts = [];
 let transactions = [];
 let currentDebtFilter = 'all'; // 'all', 'q1', 'q2'
 
+function detectDeviceType() {
+  const isMobile = window.matchMedia('(max-width: 850px)').matches || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (isMobile) {
+    document.body.classList.add('is-mobile-device');
+    document.body.classList.remove('is-desktop-device');
+  } else {
+    document.body.classList.add('is-desktop-device');
+    document.body.classList.remove('is-mobile-device');
+  }
+}
+
 // Initialize Dashboard
 document.addEventListener('DOMContentLoaded', async () => {
+  detectDeviceType();
+  window.addEventListener('resize', detectDeviceType);
   checkAPIStatus();
   setupEventListeners();
   setupEditDebtForm();
@@ -129,7 +142,7 @@ function renderAccounts() {
         </div>
         <div class="item-info">
           <h4>${escapeHTML(acc.nombre)}</h4>
-          <p>${acc.tipo === 'SERVICIO' ? 'Servicio Público / Fijo' : acc.tipo}</p>
+          <p>${acc.tipo === 'SERVICIO' ? 'Servicio Público' : acc.tipo}</p>
         </div>
       </div>
       <div class="item-right">
