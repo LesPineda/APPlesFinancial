@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>APPles Financial - Dashboard de Finanzas Personales</title>
+  <title>LesApp - Ecosistema de Gestión Personal & Financiera</title>
   <!-- Google Fonts: Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,17 +35,17 @@
       <header class="app-header">
         <div class="header-brand">
           <div class="brand-logo">
-            <i class="fa-solid fa-chart-pie"></i>
+            <i class="fa-solid fa-shapes"></i>
           </div>
           <div class="brand-text">
-            <h1>APPles Financial</h1>
-            <p class="brand-tagline">Optimización de Flujo de Caja & Liquidación</p>
+            <h1>LesApp</h1>
+            <p class="brand-tagline">Ecosistema de Gestión Personal & Financiera</p>
           </div>
         </div>
         <div class="header-status">
           <span class="status-indicator online"></span>
           <span id="api-status">Conectando...</span>
-          <button id="btn-install-pwa" class="btn-install-pwa" title="Instalar APPles Financial en tu celular">
+          <button id="btn-install-pwa" class="btn-install-pwa" title="Instalar LesApp en tu celular">
             <i class="fa-solid fa-download"></i> <span>Instalar App</span>
           </button>
           <button id="btn-toggle-sim-mobile" class="btn-sim-mobile" title="Simular Vista Celular (Samsung S25 Plus)">
@@ -57,35 +57,49 @@
         </div>
       </header>
 
-      <!-- Mobile Navigation Tabs (visible only on mobile/tablet) -->
-      <nav class="mobile-nav-tabs" aria-label="Navegación de secciones">
-        <button class="nav-tab active" data-target="col-all" title="Ver todas las secciones">
-          <i class="fa-solid fa-border-all"></i>
-          <span>Todo</span>
-        </button>
-        <button class="nav-tab" data-target="col-accounts" title="Cuentas y Saldos">
+      <!-- Top Level Main Modules Navigation -->
+      <nav class="main-module-nav" aria-label="Módulos Principales de LesApp">
+        <button class="module-tab active" data-module="module-finanzas">
           <i class="fa-solid fa-wallet"></i>
-          <span>Cuentas</span>
+          <span>Finanzas</span>
         </button>
-        <button class="nav-tab" data-target="col-debts" title="Deudas y Simulador">
-          <i class="fa-solid fa-scale-unbalanced-key"></i>
-          <span>Deudas</span>
-        </button>
-        <button class="nav-tab" data-target="col-optimization" title="Diagnóstico y Plan de Pago">
-          <i class="fa-solid fa-chart-line"></i>
-          <span>Plan</span>
-        </button>
-        <button class="nav-tab" data-target="col-transactions" title="Historial de Movimientos">
-          <i class="fa-solid fa-list-check"></i>
-          <span>Historial</span>
+        <button class="module-tab" data-module="module-otras-gestiones">
+          <i class="fa-solid fa-folder-plus"></i>
+          <span>Otras Gestiones</span>
         </button>
       </nav>
 
-    <!-- Main Grid Dashboard -->
-    <main class="dashboard-grid">
-      
-      <!-- COLUMN 1: Accounts and Webhook Simulator -->
-      <section class="grid-col col-accounts">
+      <!-- MODULE 1: FINANZAS (Includes all financial cards, sub-tabs, and grid) -->
+      <div id="module-finanzas" class="module-view">
+        <!-- Sub-Navigation Tabs for Finanzas -->
+        <nav class="mobile-nav-tabs" aria-label="Navegación de secciones de Finanzas">
+          <button class="nav-tab active" data-target="col-all" title="Ver todas las secciones">
+            <i class="fa-solid fa-border-all"></i>
+            <span>Todo</span>
+          </button>
+          <button class="nav-tab" data-target="col-accounts" title="Cuentas y Saldos">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Cuentas</span>
+          </button>
+          <button class="nav-tab" data-target="col-debts" title="Deudas y Simulador">
+            <i class="fa-solid fa-scale-unbalanced-key"></i>
+            <span>Deudas</span>
+          </button>
+          <button class="nav-tab" data-target="col-optimization" title="Diagnóstico y Plan de Pago">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Plan</span>
+          </button>
+          <button class="nav-tab" data-target="col-transactions" title="Historial de Movimientos">
+            <i class="fa-solid fa-list-check"></i>
+            <span>Historial</span>
+          </button>
+        </nav>
+
+        <!-- Main Grid Dashboard -->
+        <main class="dashboard-grid">
+          
+          <!-- COLUMN 1: Accounts and Webhook Simulator -->
+          <section class="grid-col col-accounts">
         
         <!-- Accounts Card -->
         <div class="glass-card">
@@ -350,24 +364,56 @@
           </div>
         </div>
 
+      </main>
+      </div> <!-- End #module-finanzas -->
+
+      <!-- MODULE 2: OTRAS GESTIONES (Ready for future management modules) -->
+      <section id="module-otras-gestiones" class="module-view hidden">
+        <div class="glass-card" style="text-align: center; padding: 2.5rem 1.25rem;">
+          <div style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;">
+            <i class="fa-solid fa-folder-plus"></i>
+          </div>
+          <h2 style="font-size: 1.5rem; color: #fff; margin-bottom: 0.5rem;">Otras Gestiones</h2>
+          <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 1.5rem; line-height: 1.5; font-size: 0.9rem;">
+            Espacio reservado para incorporar tus nuevos módulos de gestión personal (Tareas, Inventario, Notas y Proyectos).
+          </p>
+          
+          <div class="gestiones-preview-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.85rem; max-width: 600px; margin: 0 auto;">
+            <div class="gas-stat-box" style="padding: 1.1rem 0.75rem; border-color: rgba(139, 92, 246, 0.25);">
+              <i class="fa-solid fa-list-check" style="font-size: 1.6rem; color: var(--primary); margin-bottom: 0.5rem; display: block;"></i>
+              <strong style="font-size: 0.85rem; color: #fff; display:block;">Tareas & Pendientes</strong>
+              <span style="font-size: 0.68rem; color: var(--text-muted);">Próximamente</span>
+            </div>
+            <div class="gas-stat-box" style="padding: 1.1rem 0.75rem; border-color: rgba(59, 130, 246, 0.25);">
+              <i class="fa-solid fa-boxes-stacked" style="font-size: 1.6rem; color: var(--secondary); margin-bottom: 0.5rem; display: block;"></i>
+              <strong style="font-size: 0.85rem; color: #fff; display:block;">Inventario & Bienes</strong>
+              <span style="font-size: 0.68rem; color: var(--text-muted);">Próximamente</span>
+            </div>
+            <div class="gas-stat-box" style="padding: 1.1rem 0.75rem; border-color: rgba(16, 185, 129, 0.25);">
+              <i class="fa-solid fa-note-sticky" style="font-size: 1.6rem; color: var(--accent); margin-bottom: 0.5rem; display: block;"></i>
+              <strong style="font-size: 0.85rem; color: #fff; display:block;">Notas & Recordatorios</strong>
+              <span style="font-size: 0.68rem; color: var(--text-muted);">Próximamente</span>
+            </div>
+          </div>
+        </div>
       </section>
 
-    </main>
-  </div></div>
+    </div>
+  </div>
 
   <!-- Login Screen Overlay (Shown by default) -->
   <div id="login-overlay" class="login-overlay">
     <div class="glass-card login-card animate-slide-down">
       <div class="login-logo">
-        <i class="fa-solid fa-chart-pie"></i>
+        <i class="fa-solid fa-shapes"></i>
       </div>
-      <h2>APPles Financial</h2>
-      <p>Bienvenido a tu optimizador de flujo de caja y liquidación de deudas.</p>
+      <h2>LesApp</h2>
+      <p>Bienvenido a tu ecosistema de gestión personal y optimización financiera.</p>
       <button id="btn-login" class="btn-google">
         <i class="fa-brands fa-google"></i> Iniciar Sesión con Google
       </button>
       <div class="login-footer">
-        APPLES FINANCIAL &copy; 2026 &bull; CONTROL DE ACCESO
+        LESAPP &copy; 2026 &bull; CONTROL DE ACCESO
       </div>
     </div>
   </div>

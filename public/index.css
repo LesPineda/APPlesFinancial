@@ -125,6 +125,62 @@ body {
   box-shadow: 0 0 8px var(--accent);
 }
 
+/* Main Top-Level Modules Navigation Bar (LesApp) */
+.main-module-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding: 0.35rem;
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.module-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.2rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  color: var(--text-muted);
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.module-tab i {
+  font-size: 1.1rem;
+}
+
+.module-tab:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.module-tab.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.module-view {
+  width: 100%;
+  transition: var(--transition);
+}
+
 /* Mobile Navigation Tabs */
 .mobile-nav-tabs {
   display: none;

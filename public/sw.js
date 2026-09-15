@@ -1,5 +1,5 @@
-// Service Worker para APPles Financial PWA (Android & Web)
-const CACHE_NAME = 'apples-fin-pwa-v54';
+// Service Worker para LesApp PWA (Android & Web)
+const CACHE_NAME = 'lesapp-pwa-v55';
 const ASSETS = [
   '/',
   '/index.html',

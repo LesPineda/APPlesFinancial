@@ -1712,15 +1712,40 @@ function setupPWAInstallButton() {
       }
       deferredPrompt = null;
     } else if (isIOS) {
-      alert('📱 Para instalar APPles Financial en tu iPhone / iPad:\n\n1. Toca el botón Compartir en Safari (el ícono con una flecha hacia arriba ⎋).\n2. Selecciona "Agregar a inicio" (+).');
+      alert('📱 Para instalar LesApp en tu iPhone / iPad:\n\n1. Toca el botón Compartir en Safari (el ícono con una flecha hacia arriba ⎋).\n2. Selecciona "Agregar a inicio" (+).');
     } else {
       alert('📱 Para instalar la aplicación en tu celular:\n\n1. Toca el menú de opciones de tu navegador (los 3 puntos ⋮ arriba a la derecha).\n2. Selecciona "Instalar aplicación" o "Agregar a la pantalla principal".');
     }
   });
 }
 
+function setupMainModuleTabs() {
+  const moduleTabs = document.querySelectorAll('.main-module-nav .module-tab');
+  const moduleViews = document.querySelectorAll('.module-view');
+
+  if (!moduleTabs.length) return;
+
+  moduleTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetId = tab.getAttribute('data-module');
+      moduleTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      moduleViews.forEach(view => {
+        if (view.id === targetId) {
+          view.classList.remove('hidden');
+        } else {
+          view.classList.add('hidden');
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+}
+
 // 5. Setup Events Listeners
 function setupEventListeners() {
+  setupMainModuleTabs();
   setupMobileTabs();
   setupPWAInstallButton();
 
