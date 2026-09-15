@@ -157,8 +157,135 @@ function renderAccounts() {
   `).join('');
 }
 
+function formatKm(km) {
+  if (km == null || isNaN(km)) return '0';
+  return Number(km).toLocaleString('es-CO', { maximumFractionDigits: 0 });
+}
+
+function renderGasolinaMetrics() {
+  const container = document.getElementById('gasolina-metrics-container');
+  if (!container) return;
+
+  // Filter fuel transactions
+  const fuelTxs = transactions
+    .filter(t => (t.kilometraje != null && t.kilometraje > 0) || (t.descripcion && (t.descripcion.toLowerCase().includes('gasolina') || t.descripcion.toLowerCase().includes('tanqueo'))))
+    .sort((a, b) => new Date(a.fecha_transaccion) - new Date(b.fecha_transaccion));
+
+  if (fuelTxs.length === 0) {
+    container.innerHTML = `
+      <div class="gas-alert-banner warning" style="margin-top:0.4rem;">
+        <i class="fa-solid fa-circle-info"></i>
+        <strong>Sin registros de gasolina aún.</strong> Haz clic arriba en <strong>+ Tanqueo Hoy</strong> para registrar tu tanqueo de la <strong>Pulsar N160</strong> con el kilometraje actual y auditar el rendimiento.
+      </div>
+    `;
+    return;
+  }
+
+  const kmTxs = fuelTxs.filter(t => t.kilometraje != null && t.kilometraje > 0);
+  const latestTx = fuelTxs[fuelTxs.length - 1];
+  const latestKm = kmTxs.length > 0 ? kmTxs[kmTxs.length - 1].kilometraje : null;
+
+  if (kmTxs.length < 2) {
+    container.innerHTML = `
+      <div class="gasolina-stats-grid">
+        <div class="gas-stat-box">
+          <span class="stat-label">Último Tanqueo</span>
+          <span class="stat-val">$${formatMoney(latestTx.monto)}</span>
+        </div>
+        <div class="gas-stat-box">
+          <span class="stat-label">Odómetro N160</span>
+          <span class="stat-val" style="color:#f59e0b;">${latestKm ? formatKm(latestKm) + ' km' : 'Sin reg.'}</span>
+        </div>
+        <div class="gas-stat-box">
+          <span class="stat-label">Fecha</span>
+          <span class="stat-val" style="font-size:0.8rem;">${formatDateOnly(latestTx.fecha_transaccion)}</span>
+        </div>
+      </div>
+      <div class="gas-alert-banner normal" style="margin-top:0.4rem;">
+        <i class="fa-solid fa-shield-check"></i>
+        <strong>Primer tanqueo guardado para tu Pulsar N160 (${latestKm ? formatKm(latestKm) + ' km' : 'sin km'}).</strong> Registra tu siguiente tanqueo para calcular automáticamente los km/galón, el rendimiento y validar si la inyección y motor están en estado óptimo.
+      </div>
+    `;
+    return;
+  }
+
+  const lastKmTx = kmTxs[kmTxs.length - 1];
+  const prevKmTx = kmTxs[kmTxs.length - 2];
+
+  const deltaKm = lastKmTx.kilometraje - prevKmTx.kilometraje;
+  const costPerKm = deltaKm > 0 ? Math.round(Number(lastKmTx.monto) / deltaKm) : 0;
+
+  // Pulsar N160 Fuel Efficiency Specs:
+  // Standard Gasoline price in Colombia ~ $15.800 COP/galón
+  const pricePerGal = 15800;
+  const estimatedGalons = Number(lastKmTx.monto) / pricePerGal;
+  const kmPerGal = (deltaKm > 0 && estimatedGalons > 0) ? Math.round(deltaKm / estimatedGalons) : 0;
+  const kmPerLiter = (kmPerGal > 0) ? (kmPerGal / 3.785).toFixed(1) : 0;
+
+  let alertClass = 'normal';
+  let alertIcon = 'fa-circle-check';
+  let alertTitle = '🟢 Consumo Eficiente & Estándar (Pulsar N160)';
+  let alertMsg = `Tu Pulsar N160 rindió <strong>${kmPerGal} km/galón</strong> (${kmPerLiter} km/L) a <strong>$${formatMoney(costPerKm)}/km</strong>. Tu consumo está dentro del rango óptimo recomendado de fábrica (125-150 km/gal).`;
+
+  if (deltaKm <= 0) {
+    alertClass = 'warning';
+    alertIcon = 'fa-triangle-exclamation';
+    alertTitle = 'Verificar Odómetro N160';
+    alertMsg = `El kilometraje ingresado (${formatKm(lastKmTx.kilometraje)} km) es menor o igual al anterior (${formatKm(prevKmTx.kilometraje)} km). Revisa el tablero digital de tu Pulsar N160.`;
+  } else if (kmPerGal >= 145) {
+    alertClass = 'normal';
+    alertIcon = 'fa-trophy';
+    alertTitle = '🌟 Excelente Rendimiento (Pulsar N160)';
+    alertMsg = `¡Excelente economía! Tu Pulsar N160 rindió <strong>${kmPerGal} km/galón</strong> (${kmPerLiter} km/L), superando el promedio estándar ($${formatMoney(costPerKm)}/km). Excelente aceleración y ruta libre.`;
+  } else if (kmPerGal >= 115 && kmPerGal < 125) {
+    alertClass = 'warning';
+    alertIcon = 'fa-gauge';
+    alertTitle = '🟡 Consumo Ligeramente Alto (Pulsar N160)';
+    alertMsg = `Tu Pulsar N160 rindió <strong>${kmPerGal} km/galón</strong> (${kmPerLiter} km/L - $${formatMoney(costPerKm)}/km). Un poco por debajo del promedio estándar (130-150 km/gal). Puede deberse a tráfico denso o aceleraciones rápidas.`;
+  } else if (kmPerGal < 115) {
+    alertClass = 'high-consumption';
+    alertIcon = 'fa-triangle-exclamation';
+    alertTitle = '🚨 ¡Alerta! Consumo Alto / Gastando Más Gasolina';
+    alertMsg = `Tu Pulsar N160 rindió únicamente <strong>${kmPerGal} km/galón</strong> (${kmPerLiter} km/L - $${formatMoney(costPerKm)}/km). Una Pulsar N160 en buen estado rinde entre 130 y 150 km/gal. <strong>Puntos recomendados a revisar:</strong>
+    <ul style="margin: 0.3rem 0 0 1.2rem; padding:0;">
+      <li>Presión de neumáticos (Delantera: 25 PSI | Trasera: 28-32 PSI).</li>
+      <li>Filtro de aire sucio o bujía desgastada.</li>
+      <li>Inyección Electrónica (FI) o cuerpo de aceleración.</li>
+      <li>Tensión y lubricación de cadena.</li>
+    </ul>`;
+  }
+
+  container.innerHTML = `
+    <div class="gasolina-stats-grid">
+      <div class="gas-stat-box">
+        <span class="stat-label">Odómetro N160</span>
+        <span class="stat-val" style="color:#f59e0b;">${formatKm(lastKmTx.kilometraje)} km</span>
+      </div>
+      <div class="gas-stat-box">
+        <span class="stat-label">Recorrido</span>
+        <span class="stat-val">${deltaKm > 0 ? '+' + formatKm(deltaKm) + ' km' : '0 km'}</span>
+      </div>
+      <div class="gas-stat-box">
+        <span class="stat-label">Rendimiento</span>
+        <span class="stat-val" style="color:#60a5fa;">${kmPerGal > 0 ? kmPerGal + ' km/gal' : 'N/A'}</span>
+      </div>
+      <div class="gas-stat-box">
+        <span class="stat-label">Costo por km</span>
+        <span class="stat-val">$${formatMoney(costPerKm)}/km</span>
+      </div>
+    </div>
+    <div class="gas-alert-banner ${alertClass}">
+      <i class="fa-solid ${alertIcon}"></i>
+      <strong>${alertTitle}</strong>
+      <div style="margin:0.2rem 0 0 0;">${alertMsg}</div>
+    </div>
+  `;
+}
+
 function renderTransactions() {
   const container = document.getElementById('transactions-list');
+  renderGasolinaMetrics();
+
   if (transactions.length === 0) {
     container.innerHTML = `<div class="loading-spinner">No hay transacciones registradas</div>`;
     return;
@@ -166,9 +293,9 @@ function renderTransactions() {
 
   container.innerHTML = transactions.map(tx => {
     const isGasto = tx.tipo === 'GASTO';
-    // Find account name
     const acc = accounts.find(a => a.id === tx.cuenta_id);
     const accountName = acc ? acc.nombre : 'Cuenta desconocida';
+    const kmBadge = tx.kilometraje ? `<span class="km-badge"><i class="fa-solid fa-gauge-high"></i> ${formatKm(tx.kilometraje)} km</span>` : '';
 
     return `
       <div class="transaction-item">
@@ -177,7 +304,10 @@ function renderTransactions() {
             <i class="${isGasto ? 'fa-solid fa-arrow-up-right-from-square' : 'fa-solid fa-arrow-down-left-from-square'}"></i>
           </div>
           <div class="item-info">
-            <h4>${escapeHTML(tx.descripcion)}</h4>
+            <h4 style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+              ${escapeHTML(tx.descripcion)}
+              ${kmBadge}
+            </h4>
             <p>${escapeHTML(accountName)} • ${formatDate(tx.fecha_transaccion)}</p>
           </div>
         </div>
@@ -1486,13 +1616,13 @@ function renderCashFlowReport() {
 
 // 4. Form Selects Population
 function populateAccountSelects() {
-  const selects = ['tx-cuenta', 'debt-cuenta'];
+  const selects = ['tx-cuenta', 'debt-cuenta', 'fuel-cuenta'];
   
   selects.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     
-    const placeholder = id === 'tx-cuenta' ? 'Selecciona Cuenta' : 'Asociar a Cuenta';
+    const placeholder = id === 'tx-cuenta' ? 'Selecciona Cuenta' : (id === 'fuel-cuenta' ? 'Cuenta de Pago (Daviplata, Nequi, etc.)' : 'Asociar a Cuenta');
     el.innerHTML = `
       <option value="" disabled selected>${placeholder}</option>
       ${accounts.map(acc => `<option value="${acc.id}">${escapeHTML(acc.nombre)} (${acc.tipo})</option>`).join('')}
@@ -1609,6 +1739,19 @@ function setupEventListeners() {
   setupFormToggle('btn-show-add-account', 'form-add-account', 'btn-cancel-account');
   setupFormToggle('btn-show-add-debt', 'form-add-debt', 'btn-cancel-debt');
   setupFormToggle('btn-show-add-transaction', 'form-add-transaction', 'btn-cancel-tx');
+  setupFormToggle('btn-show-add-fuel', 'form-add-fuel', 'btn-cancel-fuel');
+
+  const btnShowFuel = document.getElementById('btn-show-add-fuel');
+  if (btnShowFuel) {
+    btnShowFuel.addEventListener('click', () => {
+      const fuelDateInput = document.getElementById('fuel-fecha');
+      if (fuelDateInput) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        fuelDateInput.value = now.toISOString().slice(0, 16);
+      }
+    });
+  }
 
   // Submit Add Account
   document.getElementById('form-add-account').addEventListener('submit', async (e) => {
@@ -1679,6 +1822,7 @@ function setupEventListeners() {
     const monto = document.getElementById('tx-monto').value;
     const descripcion = document.getElementById('tx-descripcion').value;
     const fecha_transaccion = document.getElementById('tx-fecha').value;
+    const kilometraje = document.getElementById('tx-km') ? document.getElementById('tx-km').value : null;
 
     try {
       const res = await fetch(`${API_BASE}/transactions`, {
@@ -1689,7 +1833,8 @@ function setupEventListeners() {
           tipo,
           monto,
           descripcion,
-          fecha_transaccion
+          fecha_transaccion,
+          kilometraje: kilometraje ? Number(kilometraje) : null
         })
       });
       const data = await res.json();
@@ -1702,6 +1847,46 @@ function setupEventListeners() {
       alert('Error al registrar transacción.');
     }
   });
+
+  // Submit Add Fuel (Tanqueo Moto)
+  const formAddFuel = document.getElementById('form-add-fuel');
+  if (formAddFuel) {
+    formAddFuel.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cuenta_id = document.getElementById('fuel-cuenta').value;
+      const monto = document.getElementById('fuel-monto').value;
+      const kilometraje = document.getElementById('fuel-km').value;
+      const fecha_transaccion = document.getElementById('fuel-fecha').value;
+      const descVal = document.getElementById('fuel-descripcion').value;
+      const descripcion = descVal && descVal.trim() !== '' ? descVal.trim() : 'Gasolina Moto';
+
+      try {
+        const res = await fetch(`${API_BASE}/transactions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cuenta_id,
+            tipo: 'GASTO',
+            monto,
+            descripcion,
+            fecha_transaccion,
+            kilometraje: kilometraje ? Number(kilometraje) : null
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          formAddFuel.reset();
+          document.getElementById('fuel-descripcion').value = 'Gasolina Moto';
+          formAddFuel.classList.add('hidden');
+          await loadData();
+        } else {
+          alert('Error: ' + (data.message || 'No se pudo guardar el tanqueo'));
+        }
+      } catch (err) {
+        alert('Error al registrar el tanqueo de gasolina.');
+      }
+    });
+  }
 
   // Webhook Simulator submit
   const webhookForm = document.getElementById('form-webhook');

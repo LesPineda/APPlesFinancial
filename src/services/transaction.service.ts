@@ -21,6 +21,7 @@ export class TransactionService {
     monto: number;
     fecha_transaccion: Date;
     descripcion: string;
+    kilometraje?: number | null;
   }): Promise<Transaction> {
     // Verificar que la cuenta exista
     const account = await prisma.account.findUnique({
@@ -38,7 +39,8 @@ export class TransactionService {
           tipo: data.tipo,
           monto: data.monto,
           fecha_transaccion: data.fecha_transaccion,
-          descripcion: data.descripcion
+          descripcion: data.descripcion,
+          kilometraje: data.kilometraje !== undefined && data.kilometraje !== null ? Number(data.kilometraje) : null
         }
       });
 
@@ -140,6 +142,7 @@ export class TransactionService {
       monto?: number;
       fecha_transaccion?: Date;
       descripcion?: string;
+      kilometraje?: number | null;
     }
   ): Promise<Transaction> {
     const existing = await prisma.transaction.findUnique({
@@ -192,7 +195,8 @@ export class TransactionService {
           tipo: data.tipo,
           monto: data.monto,
           fecha_transaccion: data.fecha_transaccion,
-          descripcion: data.descripcion
+          descripcion: data.descripcion,
+          kilometraje: data.kilometraje !== undefined ? (data.kilometraje !== null ? Number(data.kilometraje) : null) : undefined
         }
       });
     });

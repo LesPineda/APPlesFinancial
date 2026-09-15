@@ -22,7 +22,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" type="image/png" href="icon-192.png">
-  <link rel="stylesheet" href="index.css?v=50">
+  <link rel="stylesheet" href="index.css?v=53">
 </head>
 <body>
   <!-- Ambient Background Glows -->
@@ -259,6 +259,52 @@
       <!-- COLUMN 3: Transactions History -->
       <section class="grid-col col-transactions">
         
+        <!-- Gasolina Moto & Control de Rendimiento Card -->
+        <div class="glass-card gasolina-card" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-motorcycle" style="color: #f59e0b;"></i> Gasolina Pulsar N160 & Rendimiento</h2>
+            <button id="btn-show-add-fuel" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #f59e0b, #d97706); border:none;" title="Registrar Tanqueo para Hoy">
+              <i class="fa-solid fa-plus"></i> + Tanqueo Hoy
+            </button>
+          </div>
+
+          <!-- Add Fuel Form (Hidden by default) -->
+          <form id="form-add-fuel" class="inline-form hidden">
+            <h3>⛽ Nuevo Registro de Tanqueo - Pulsar N160</h3>
+            <div class="form-group">
+              <select id="fuel-cuenta" required>
+                <!-- Dynamically populated -->
+                <option value="" disabled selected>Cuenta de Pago (Daviplata, Nequi, etc.)</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fuel-monto">Valor Tanqueo ($)</label>
+                <input type="number" id="fuel-monto" placeholder="Ej: 45000" step="0.01" required>
+              </div>
+              <div class="form-group">
+                <label for="fuel-km">Kilometraje Odómetro (km)</label>
+                <input type="number" id="fuel-km" placeholder="Ej: 45200" step="1" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fuel-fecha">Fecha y Hora</label>
+              <input type="datetime-local" id="fuel-fecha" required>
+            </div>
+            <div class="form-group">
+              <input type="text" id="fuel-descripcion" value="Gasolina Moto" placeholder="Notas u observación (opcional)">
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706); border:none;"><i class="fa-solid fa-gas-pump"></i> Guardar Tanqueo</button>
+              <button type="button" id="btn-cancel-fuel" class="btn btn-secondary">Cancelar</button>
+            </div>
+          </form>
+
+          <div id="gasolina-metrics-container" class="gasolina-metrics-container">
+            <!-- Dynamically populated fuel metrics -->
+          </div>
+        </div>
+
         <!-- Transactions Card -->
         <div class="glass-card">
           <div class="card-header">
@@ -284,8 +330,9 @@
               </select>
               <input type="number" id="tx-monto" placeholder="Monto" step="0.01" required>
             </div>
-            <div class="form-group">
-              <input type="text" id="tx-descripcion" placeholder="Descripción" required>
+            <div class="form-row">
+              <input type="text" id="tx-descripcion" placeholder="Descripción" required style="flex:2;">
+              <input type="number" id="tx-km" placeholder="Km (Opcional)" step="1" title="Kilometraje del vehículo si aplica" style="flex:1;">
             </div>
             <div class="form-group">
               <label>Fecha</label>
@@ -391,7 +438,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=50"></script>
+  <script src="app.js?v=53"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

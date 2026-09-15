@@ -29,7 +29,7 @@ export class TransactionController {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
-      const { cuenta_id, tipo, monto, fecha_transaccion, descripcion } = req.body;
+      const { cuenta_id, tipo, monto, fecha_transaccion, descripcion, kilometraje } = req.body;
 
       if (!['INGRESO', 'GASTO'].includes(tipo)) {
         throw new AppError(400, 'Tipo de transacción inválido. Debe ser INGRESO o GASTO.');
@@ -49,7 +49,8 @@ export class TransactionController {
         tipo,
         monto: Number(monto),
         fecha_transaccion: parsedDate,
-        descripcion
+        descripcion,
+        kilometraje: kilometraje !== undefined && kilometraje !== null && kilometraje !== '' ? Number(kilometraje) : null
       });
 
       return res.status(201).json({ status: 'success', data: transaction });
@@ -61,7 +62,7 @@ export class TransactionController {
   async update(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
       const { id } = req.params as { id: string };
-      const { cuenta_id, tipo, monto, fecha_transaccion, descripcion } = req.body;
+      const { cuenta_id, tipo, monto, fecha_transaccion, descripcion, kilometraje } = req.body;
 
       const updateData: any = {};
       if (cuenta_id !== undefined) updateData.cuenta_id = cuenta_id;
@@ -85,6 +86,9 @@ export class TransactionController {
         updateData.fecha_transaccion = parsedDate;
       }
       if (descripcion !== undefined) updateData.descripcion = descripcion;
+      if (kilometraje !== undefined) {
+        updateData.kilometraje = kilometraje !== null && kilometraje !== '' ? Number(kilometraje) : null;
+      }
 
       const transaction = await transactionService.update(id, updateData);
       return res.json({ status: 'success', data: transaction });

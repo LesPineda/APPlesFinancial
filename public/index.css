@@ -1371,5 +1371,86 @@ body.device-sim-active .item-actions {
   opacity: 1 !important;
 }
 
+/* Gasolina Moto & Fuel Efficiency Styles */
+.gasolina-card {
+  border-left: 4px solid #f59e0b !important;
+}
+
+.gasolina-metrics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.gasolina-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.6rem;
+}
+
+.gas-stat-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.65rem;
+  text-align: center;
+}
+
+.gas-stat-box .stat-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.gas-stat-box .stat-val {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.gas-alert-banner {
+  padding: 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.gas-alert-banner.normal {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #34d399;
+}
+
+.gas-alert-banner.warning {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+
+.gas-alert-banner.high-consumption {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+}
+
+.km-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+
 
 
