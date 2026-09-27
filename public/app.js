@@ -3374,9 +3374,18 @@ function renderV2HeroKPIs() {
   // 3. Biweekly income total (Q1 + Q2)
   const incomeData = getV2IncomeData();
   const effectiveIncome = incomeData.totalMonthlyIncome;
-  const netSurplus = effectiveIncome - totalMonthlyCuotas;
 
-  // 4. Calculate Financial Health Score (0 - 100%)
+  // 4. Total expenses registered in current month
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  const totalExpensesThisMonth = transactions.filter(t => {
+    if (t.tipo !== 'GASTO') return false;
+    const txDate = parseLocalDate(t.fecha_transaccion);
+    return txDate.getFullYear() === currentYear && txDate.getMonth() === currentMonth;
+  }).reduce((sum, t) => sum + Number(t.monto), 0);
+
+  // 5. Calculate Financial Health Score (0 - 100%)
   const debtRatio = effectiveIncome > 0 ? (totalMonthlyCuotas / effectiveIncome) * 100 : 50;
   let healthScore = 100 - Math.min(60, debtRatio);
   if (availableLiquid < 0) healthScore -= 20;
@@ -3404,6 +3413,12 @@ function renderV2HeroKPIs() {
       <span class="kpi-label"><i class="fa-solid fa-hand-holding-dollar text-primary"></i> Ingresos Mensuales</span>
       <span class="kpi-val" style="color: #60a5fa;">$${formatMoney(effectiveIncome)}</span>
       <span class="kpi-sub">Sueldo / Cobros (30d)</span>
+    </div>
+
+    <div class="v2-kpi-card">
+      <span class="kpi-label"><i class="fa-solid fa-arrow-down-long text-danger"></i> Gastos Realizados Mes</span>
+      <span class="kpi-val" style="color: #ef4444;">$${formatMoney(totalExpensesThisMonth)}</span>
+      <span class="kpi-sub">Movimientos ejecutados</span>
     </div>
 
     <div class="v2-kpi-card">
