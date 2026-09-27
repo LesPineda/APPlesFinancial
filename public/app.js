@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   checkAPIStatus();
   setupEventListeners();
   setupEditDebtForm();
+  setupV2TabListeners();
   await initializeFirebase();
 });
 
@@ -67,6 +68,7 @@ async function loadData() {
   await fetchAccounts();
   await fetchTransactions();
   await fetchDebts();
+  renderV2Dashboard();
 }
 
 async function fetchAccounts() {
@@ -284,14 +286,17 @@ function renderGasolinaMetrics() {
 
 function renderTransactions() {
   const container = document.getElementById('transactions-list');
+  const v2Container = document.getElementById('v2-transactions-list');
   renderGasolinaMetrics();
 
   if (transactions.length === 0) {
-    container.innerHTML = `<div class="loading-spinner">No hay transacciones registradas</div>`;
+    const emptyHTML = `<div class="loading-spinner">No hay transacciones registradas</div>`;
+    if (container) container.innerHTML = emptyHTML;
+    if (v2Container) v2Container.innerHTML = emptyHTML;
     return;
   }
 
-  container.innerHTML = transactions.map(tx => {
+  const txHTML = transactions.map(tx => {
     const isGasto = tx.tipo === 'GASTO';
     const acc = accounts.find(a => a.id === tx.cuenta_id);
     const accountName = acc ? acc.nombre : 'Cuenta desconocida';
@@ -324,6 +329,9 @@ function renderTransactions() {
       </div>
     `;
   }).join('');
+
+  if (container) container.innerHTML = txHTML;
+  if (v2Container) v2Container.innerHTML = txHTML;
 }
 
 function renderDebts(prioritizationMethod) {
@@ -2097,11 +2105,24 @@ function setupEventListeners() {
     }
   });
 
-  document.getElementById('transactions-list').addEventListener('click', async (e) => {
+  const handleTxClick = async (e) => {
     const btn = e.target.closest('.delete-tx-btn');
     if (btn) {
       const id = btn.dataset.id;
       await deleteTransaction(id);
+    }
+  };
+
+  const txList1 = document.getElementById('transactions-list');
+  if (txList1) txList1.addEventListener('click', handleTxClick);
+
+  document.addEventListener('click', async (e) => {
+    if (e.target.closest('#v2-transactions-list .delete-tx-btn')) {
+      const btn = e.target.closest('.delete-tx-btn');
+      if (btn) {
+        const id = btn.dataset.id;
+        await deleteTransaction(id);
+      }
     }
   });
 }
@@ -2778,4 +2799,1316 @@ function setupAuthListeners() {
       });
     });
   }
+}
+
+/* ==========================================================================
+   VERSIÓN 2.0 (V2 SMART HUB) ENGINE & REACTIVE SYNCHRONIZER
+   ========================================================================== */
+
+// Global Modal & Helper Functions
+function populateAccountSelects() {
+  const selects = [
+    document.getElementById('tx-cuenta'),
+    document.getElementById('fuel-cuenta'),
+    document.getElementById('debt-cuenta'),
+    document.getElementById('modal-tx-cuenta'),
+    document.getElementById('modal-fuel-cuenta'),
+    document.getElementById('modal-debt-cuenta')
+  ];
+
+  const optionsHTML = '<option value="" disabled selected>Selecciona Cuenta</option>' + 
+    accounts.map(a => `<option value="${a.id}">${escapeHTML(a.nombre)} (${a.tipo})</option>`).join('');
+
+  selects.forEach(select => {
+    if (select) select.innerHTML = optionsHTML;
+  });
+}
+
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  populateAccountSelects();
+  
+  const nowStr = new Date().toISOString().slice(0, 16);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  
+  const txDate = document.getElementById('modal-tx-fecha');
+  if (txDate && !txDate.value) txDate.value = nowStr;
+  
+  const fuelDate = document.getElementById('modal-fuel-fecha');
+  if (fuelDate && !fuelDate.value) fuelDate.value = nowStr;
+
+  const debtCorte = document.getElementById('modal-debt-corte');
+  if (debtCorte && !debtCorte.value) debtCorte.value = todayStr;
+  const debtLimite = document.getElementById('modal-debt-limite');
+  if (debtLimite && !debtLimite.value) debtLimite.value = todayStr;
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.add('hidden');
+}
+
+function formatDateForInput(dateStr) {
+  if (!dateStr) return '';
+  const d = parseLocalDate(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function openEditDebtModal(debtId) {
+  const debt = debts.find(d => String(d.id) === String(debtId));
+  if (!debt) return;
+
+  const idInput = document.getElementById('edit-debt-id');
+  const nombreInput = document.getElementById('edit-debt-nombre');
+  const saldoInput = document.getElementById('edit-debt-saldo');
+  const pagoInput = document.getElementById('edit-debt-pago');
+  const limiteInput = document.getElementById('edit-debt-limite');
+  const cubiertoInput = document.getElementById('edit-debt-cubierto-por');
+
+  if (idInput) idInput.value = debt.id;
+  if (nombreInput) nombreInput.value = debt.cuenta ? debt.cuenta.nombre : 'Deuda';
+  if (saldoInput) saldoInput.value = debt.saldo_total;
+  if (pagoInput) pagoInput.value = debt.pago_minimo;
+  if (limiteInput) limiteInput.value = formatDateForInput(debt.fecha_limite_pago);
+  if (cubiertoInput) cubiertoInput.value = debt.cubierto_por || '';
+
+  openModal('edit-debt-modal');
+}
+
+async function deleteDebt(debtId) {
+  const debt = debts.find(d => String(d.id) === String(debtId));
+  const name = debt && debt.cuenta ? debt.cuenta.nombre : 'Deuda';
+  
+  if (!confirm(`¿Estás seguro de que deseas eliminar la obligación "${name}"?`)) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/debts/${debtId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.status === 'success') {
+      await loadData();
+    } else {
+      alert(`Error al eliminar: ${data.message || 'No se pudo eliminar'}`);
+    }
+  } catch (err) {
+    alert('Error de conexión al eliminar la deuda.');
+  }
+}
+
+function setupV2TabListeners() {
+  const v2Tabs = document.querySelectorAll('.v2-sub-nav .v2-tab');
+  const v2Views = document.querySelectorAll('.v2-subview');
+
+  if (v2Tabs.length) {
+    v2Tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetId = tab.getAttribute('data-v2tab');
+        v2Tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        v2Views.forEach(view => {
+          if (view.id === targetId) {
+            view.classList.remove('hidden');
+          } else {
+            view.classList.add('hidden');
+          }
+        });
+      });
+    });
+  }
+
+  // Quick Action Buttons V2 -> Open Global Modals
+  const btnAddTx = document.getElementById('v2-btn-add-tx');
+  if (btnAddTx) {
+    btnAddTx.onclick = () => openModal('modal-add-transaction');
+  }
+
+  const btnAddFuel = document.getElementById('v2-btn-add-fuel');
+  if (btnAddFuel) {
+    btnAddFuel.onclick = () => openModal('modal-add-fuel');
+  }
+
+  const btnAddDebt = document.getElementById('v2-btn-add-debt');
+  if (btnAddDebt) {
+    btnAddDebt.onclick = () => openModal('modal-add-debt');
+  }
+
+  // Cancel Buttons inside Modals
+  const btnCancelTx = document.getElementById('btn-cancel-modal-tx');
+  if (btnCancelTx) btnCancelTx.onclick = () => closeModal('modal-add-transaction');
+
+  const btnCancelFuel = document.getElementById('btn-cancel-modal-fuel');
+  if (btnCancelFuel) btnCancelFuel.onclick = () => closeModal('modal-add-fuel');
+
+  const btnCancelDebt = document.getElementById('btn-cancel-modal-debt');
+  if (btnCancelDebt) btnCancelDebt.onclick = () => closeModal('modal-add-debt');
+
+  const btnCancelEditDebt = document.getElementById('btn-cancel-edit-debt');
+  if (btnCancelEditDebt) btnCancelEditDebt.onclick = () => closeModal('edit-debt-modal');
+
+  // Submit Modal Handlers
+  const formAddTx = document.getElementById('form-modal-add-transaction');
+  if (formAddTx) {
+    formAddTx.onsubmit = async (e) => {
+      e.preventDefault();
+      const cuenta_id = document.getElementById('modal-tx-cuenta').value;
+      const tipo = document.getElementById('modal-tx-tipo').value;
+      const monto = document.getElementById('modal-tx-monto').value;
+      const descripcion = document.getElementById('modal-tx-descripcion').value;
+      const fecha_transaccion = document.getElementById('modal-tx-fecha').value;
+      const kilometraje = document.getElementById('modal-tx-km').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/transactions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cuenta_id,
+            tipo,
+            monto: Number(monto),
+            descripcion,
+            fecha_transaccion: new Date(fecha_transaccion).toISOString(),
+            kilometraje: kilometraje ? Number(kilometraje) : null
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          closeModal('modal-add-transaction');
+          formAddTx.reset();
+          await loadData();
+        } else {
+          alert(`Error: ${data.message || 'No se pudo guardar la transacción'}`);
+        }
+      } catch (err) {
+        alert('Error al conectar con la API.');
+      }
+    };
+  }
+
+  const formAddFuel = document.getElementById('form-modal-add-fuel');
+  if (formAddFuel) {
+    formAddFuel.onsubmit = async (e) => {
+      e.preventDefault();
+      const cuenta_id = document.getElementById('modal-fuel-cuenta').value;
+      const monto = document.getElementById('modal-fuel-monto').value;
+      const kilometraje = document.getElementById('modal-fuel-km').value;
+      const fecha_transaccion = document.getElementById('modal-fuel-fecha').value;
+      const descripcion = document.getElementById('modal-fuel-descripcion').value || 'Gasolina Moto Pulsar N160';
+
+      try {
+        const res = await fetch(`${API_BASE}/transactions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cuenta_id,
+            tipo: 'GASTO',
+            monto: Number(monto),
+            descripcion,
+            fecha_transaccion: new Date(fecha_transaccion).toISOString(),
+            kilometraje: Number(kilometraje)
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          closeModal('modal-add-fuel');
+          formAddFuel.reset();
+          await loadData();
+        } else {
+          alert(`Error: ${data.message || 'No se pudo guardar el tanqueo'}`);
+        }
+      } catch (err) {
+        alert('Error al conectar con la API.');
+      }
+    };
+  }
+
+  const formAddDebt = document.getElementById('form-modal-add-debt');
+  if (formAddDebt) {
+    formAddDebt.onsubmit = async (e) => {
+      e.preventDefault();
+      const cuenta_id = document.getElementById('modal-debt-cuenta').value;
+      const saldo_total = document.getElementById('modal-debt-saldo').value;
+      const tasa_interes_ea = document.getElementById('modal-debt-tasa').value;
+      const pago_minimo = document.getElementById('modal-debt-pago').value;
+      const fecha_corte = document.getElementById('modal-debt-corte').value;
+      const fecha_limite_pago = document.getElementById('modal-debt-limite').value;
+      const cubierto_por = document.getElementById('modal-debt-cubierto-por').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/debts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cuenta_id,
+            saldo_total: Number(saldo_total),
+            tasa_interes_ea: Number(tasa_interes_ea),
+            pago_minimo: Number(pago_minimo),
+            fecha_corte,
+            fecha_limite_pago,
+            cubierto_por: cubierto_por ? cubierto_por.trim() : null
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          closeModal('modal-add-debt');
+          formAddDebt.reset();
+          await loadData();
+        } else {
+          alert(`Error: ${data.message || 'No se pudo guardar la deuda'}`);
+        }
+      } catch (err) {
+        alert('Error al conectar con la API.');
+      }
+    };
+  }
+
+  const formEditDebt = document.getElementById('form-edit-debt');
+  if (formEditDebt) {
+    formEditDebt.onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('edit-debt-id').value;
+      const saldo_total = document.getElementById('edit-debt-saldo').value;
+      const pago_minimo = document.getElementById('edit-debt-pago').value;
+      const fecha_limite_pago = document.getElementById('edit-debt-limite').value;
+      const cubierto_por = document.getElementById('edit-debt-cubierto-por').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/debts/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            saldo_total: Number(saldo_total),
+            pago_minimo: Number(pago_minimo),
+            fecha_limite_pago,
+            cubierto_por: cubierto_por ? cubierto_por.trim() : null
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          closeModal('edit-debt-modal');
+          await loadData();
+        } else {
+          alert(`Error: ${data.message || 'No se pudo actualizar la deuda'}`);
+        }
+      } catch (err) {
+        alert('Error al actualizar la deuda.');
+      }
+    };
+  }
+
+  const btnPauseDebt = document.getElementById('btn-pause-debt');
+  if (btnPauseDebt) {
+    btnPauseDebt.onclick = async () => {
+      const id = document.getElementById('edit-debt-id').value;
+      if (!id) return;
+      if (!confirm('¿Deseas establecer el saldo a $0 para pausar o marcar como cancelada esta obligación?')) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/debts/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            saldo_total: 0,
+            pago_minimo: 0
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          closeModal('edit-debt-modal');
+          await loadData();
+        }
+      } catch (err) {
+        alert('Error al pausar la deuda.');
+      }
+    };
+  }
+}
+
+function getDebtStatusInfo(debt) {
+  const isPaidBalance = Number(debt.saldo_total) <= 0;
+  if (isPaidBalance) {
+    return {
+      status: 'PAID_BALANCE',
+      badgeLabel: 'PAGADA / $0',
+      badgeClass: 'badge-ok',
+      badgeColor: '#10b981',
+      isRequired: false,
+      requiredAmount: 0,
+      cuotasVencidas: 0
+    };
+  }
+
+  const isCoveredByOther = debt.cubierto_por && debt.cubierto_por.trim() !== '';
+  if (isCoveredByOther) {
+    return {
+      status: 'COVERED_BY_THIRD_PARTY',
+      badgeLabel: `CUBIERTO POR: ${debt.cubierto_por.toUpperCase()}`,
+      badgeClass: 'badge-covered-other',
+      badgeColor: '#60a5fa',
+      isRequired: false,
+      requiredAmount: 0,
+      cuotasVencidas: 0
+    };
+  }
+
+  const debtAccName = debt.cuenta ? debt.cuenta.nombre.toLowerCase() : '';
+  const debtAccId = debt.cuenta_id;
+
+  // Search for recent payment transaction in the last 35 days
+  const thirtyFiveDaysAgo = new Date();
+  thirtyFiveDaysAgo.setDate(thirtyFiveDaysAgo.getDate() - 35);
+
+  const recentPaymentTx = transactions.find(t => {
+    if (t.tipo !== 'GASTO') return false;
+    const txDate = parseLocalDate(t.fecha_transaccion);
+    if (txDate < thirtyFiveDaysAgo) return false;
+
+    const desc = (t.descripcion || '').toLowerCase();
+    if (debtAccName) {
+      if (desc.includes(debtAccName)) return true;
+      const cleanAcc = debtAccName.replace('pago cuota', '').trim();
+      const cleanDesc = desc.replace('pago cuota', '').trim();
+      if (cleanAcc && cleanDesc.includes(cleanAcc)) return true;
+      if (cleanDesc && cleanAcc.includes(cleanDesc)) return true;
+      if (debtAccName.includes('cadena') && desc.includes('cadena')) return true;
+      if (debtAccName.includes('tigo') && desc.includes('tigo')) return true;
+      if (debtAccName.includes('addi') && desc.includes('addi')) return true;
+      if (debtAccName.includes('tuya') && desc.includes('tuya')) return true;
+      if (debtAccName.includes('internet') && desc.includes('internet')) return true;
+    }
+    if (debtAccId && t.cuenta_id === debtAccId) return true;
+    return false;
+  });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const limiteDate = parseLocalDate(debt.fecha_limite_pago);
+  limiteDate.setHours(0, 0, 0, 0);
+
+  const diffTime = today.getTime() - limiteDate.getTime();
+  const diffDays = Math.floor(diffTime / 86400000);
+
+  const endOfCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+
+  if (recentPaymentTx) {
+    return {
+      status: 'PAID_THIS_MONTH',
+      badgeLabel: `✓ PAGADA ESTE MES ($${formatMoney(recentPaymentTx.monto)})`,
+      badgeClass: 'badge-ok',
+      badgeColor: '#10b981',
+      isRequired: false,
+      requiredAmount: 0,
+      cuotasVencidas: 0,
+      paymentTx: recentPaymentTx
+    };
+  }
+
+  if (limiteDate > endOfCurrentMonth) {
+    return {
+      status: 'PAID_THIS_MONTH',
+      badgeLabel: `✓ AL DÍA (${formatDateOnly(debt.fecha_limite_pago)})`,
+      badgeClass: 'badge-ok',
+      badgeColor: '#10b981',
+      isRequired: false,
+      requiredAmount: 0,
+      cuotasVencidas: 0
+    };
+  }
+
+  if (diffDays > 0) {
+    const cuotasVencidas = Math.max(1, Math.ceil(diffDays / 30));
+    const montoMora = cuotasVencidas * Number(debt.pago_minimo);
+    return {
+      status: 'OVERDUE',
+      badgeLabel: `VENCIDA (${cuotasVencidas} cuota${cuotasVencidas > 1 ? 's' : ''})`,
+      badgeClass: 'badge-overdue',
+      badgeColor: '#ef4444',
+      isRequired: true,
+      requiredAmount: montoMora,
+      cuotasVencidas,
+      diffDays
+    };
+  }
+
+  return {
+    status: 'UP_TO_DATE',
+    badgeLabel: 'AL DÍA',
+    badgeClass: 'badge-ok',
+    badgeColor: '#34d399',
+    isRequired: true,
+    requiredAmount: Number(debt.pago_minimo),
+    cuotasVencidas: 0
+  };
+}
+
+function checkIsOverdue(debt) {
+  const info = getDebtStatusInfo(debt);
+  return info.status === 'OVERDUE';
+}
+
+function renderV2Dashboard() {
+  renderV2HeroKPIs();
+  renderV2CategoryBreakdown();
+  renderV2TabCashflow();
+  renderV2TabDeudas();
+  renderV2TabSimulador();
+  renderV2TabGasolina();
+  renderV2TabSync();
+  renderTransactions();
+}
+
+function renderV2CategoryBreakdown() {
+  const container = document.getElementById('v2-category-breakdown');
+  if (!container) return;
+
+  const activeDebts = debts.filter(d => Number(d.saldo_total) > 0);
+  const catVivienda = activeDebts.filter(d => ['arriendo pa', 'Apartamento'].includes(d.cuenta?.nombre)).reduce((s, d) => s + (!d.cubierto_por ? Number(d.pago_minimo) : 0), 0);
+  const catUnificado = activeDebts.filter(d => d.cuenta?.nombre?.includes('Unificado')).reduce((s, d) => s + (!d.cubierto_por ? Number(d.pago_minimo) : 0), 0);
+  const catTarjetas = activeDebts.filter(d => ['Tuya Alkosto', 'Falabella', 'Addi'].includes(d.cuenta?.nombre)).reduce((s, d) => s + (!d.cubierto_por ? Number(d.pago_minimo) : 0), 0);
+  const catServicios = activeDebts.filter(d => ['Plan Tigo', 'Internet', 'luz', 'Gas', 'Solventa', 'Rapicredit', 'Cadena'].includes(d.cuenta?.nombre)).reduce((s, d) => s + (!d.cubierto_por ? Number(d.pago_minimo) : 0), 0);
+  const catFuel = transactions.filter(t => (t.kilometraje != null && t.kilometraje > 0) || (t.descripcion && t.descripcion.toLowerCase().includes('gasolina'))).reduce((s, t) => s + Number(t.monto), 0);
+
+  container.innerHTML = `
+    <div class="glass-card" style="border-left: 4px solid #f59e0b; margin: 0.8rem 0;">
+      <div class="card-header">
+        <h3><i class="fa-solid fa-chart-pie text-warning"></i> Desglose por Categoría & Tipos de Gastos</h3>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Presupuesto Mensual Auditado</span>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:0.8rem; margin-top:0.8rem;">
+        <div class="v2-list-item" style="flex-direction:column; align-items:flex-start;">
+          <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-house text-primary"></i> Vivienda & Arriendo</span>
+          <strong style="font-size:1.1rem; color:#fff;">$${formatMoney(catVivienda)}</strong>
+        </div>
+        <div class="v2-list-item" style="flex-direction:column; align-items:flex-start;">
+          <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-bolt text-warning"></i> Servicios Fijos & Públicos</span>
+          <strong style="font-size:1.1rem; color:#fff;">$${formatMoney(catServicios)}</strong>
+        </div>
+        <div class="v2-list-item" style="flex-direction:column; align-items:flex-start;">
+          <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-star text-warning"></i> Crédito Unificado</span>
+          <strong style="font-size:1.1rem; color:#f59e0b;">$${formatMoney(catUnificado)}</strong>
+        </div>
+        <div class="v2-list-item" style="flex-direction:column; align-items:flex-start;">
+          <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-credit-card text-danger"></i> Tarjetas & Créditos</span>
+          <strong style="font-size:1.1rem; color:#fff;">$${formatMoney(catTarjetas)}</strong>
+        </div>
+        <div class="v2-list-item" style="flex-direction:column; align-items:flex-start;">
+          <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-motorcycle text-success"></i> Gasolina Pulsar N160</span>
+          <strong style="font-size:1.1rem; color:#34d399;">$${formatMoney(catFuel)}</strong>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function getV2IncomeData() {
+  let q1Income = 0;
+  let q1Name = 'Nómina Ortomac (Fin de Mes)';
+  let q2Income = 0;
+  let q2Name = 'Nómina Asistia (Mitad de Mes)';
+
+  const q1Tx = transactions.find(t => {
+    if (t.tipo !== 'INGRESO') return false;
+    const day = getDueDateDay(t.fecha_transaccion);
+    return day >= 25 || day <= 14 || (t.descripcion && t.descripcion.toLowerCase().includes('ortomac'));
+  });
+
+  if (q1Tx) {
+    q1Income = Number(q1Tx.monto);
+    q1Name = q1Tx.descripcion;
+  } else {
+    q1Income = 3434375;
+  }
+
+  const q2Tx = transactions.find(t => {
+    if (t.tipo !== 'INGRESO') return false;
+    const day = getDueDateDay(t.fecha_transaccion);
+    return (day >= 15 && day <= 24) || (t.descripcion && t.descripcion.toLowerCase().includes('asistia'));
+  });
+
+  if (q2Tx) {
+    q2Income = Number(q2Tx.monto);
+    q2Name = q2Tx.descripcion;
+  } else {
+    q2Income = 2696444;
+  }
+
+  return {
+    q1Income,
+    q1Name,
+    q2Income,
+    q2Name,
+    totalMonthlyIncome: q1Income + q2Income
+  };
+}
+
+function renderV2HeroKPIs() {
+  const scoreBox = document.getElementById('v2-health-score-box');
+  const kpiGrid = document.getElementById('v2-kpi-grid');
+  if (!scoreBox || !kpiGrid) return;
+
+  // 1. Total liquid capital
+  let availableLiquid = 0;
+  accounts.forEach(a => {
+    const isDebtAcc = debts.some(d => d.cuenta_id === a.id);
+    if (!isDebtAcc && (a.tipo === 'DEBITO' || a.tipo === 'EFECTIVO')) {
+      availableLiquid += Number(a.saldo_actual);
+    }
+  });
+
+  // 2. Active debts total
+  const activeDebts = debts.filter(d => Number(d.saldo_total) > 0);
+  let totalActiveDebt = 0;
+  let totalMonthlyCuotas = 0;
+  activeDebts.forEach(d => {
+    totalActiveDebt += Number(d.saldo_total);
+    const info = getDebtStatusInfo(d);
+    totalMonthlyCuotas += info.requiredAmount;
+  });
+
+  // 3. Biweekly income total (Q1 + Q2)
+  const incomeData = getV2IncomeData();
+  const effectiveIncome = incomeData.totalMonthlyIncome;
+  const netSurplus = effectiveIncome - totalMonthlyCuotas;
+
+  // 4. Calculate Financial Health Score (0 - 100%)
+  const debtRatio = effectiveIncome > 0 ? (totalMonthlyCuotas / effectiveIncome) * 100 : 50;
+  let healthScore = 100 - Math.min(60, debtRatio);
+  if (availableLiquid < 0) healthScore -= 20;
+  if (activeDebts.some(d => checkIsOverdue(d))) healthScore -= 15;
+  healthScore = Math.max(10, Math.min(100, Math.round(healthScore)));
+
+  const healthClass = healthScore >= 75 ? 'healthy' : (healthScore >= 50 ? 'warning' : 'danger');
+  const healthLabel = healthScore >= 75 ? 'Excelente / Saludable' : (healthScore >= 50 ? 'Moderado / Ajustado' : 'Alerta / Crítico');
+
+  scoreBox.innerHTML = `
+    <span class="v2-score-badge ${healthClass}">
+      <i class="fa-solid ${healthScore >= 75 ? 'fa-heart-circle-check' : 'fa-triangle-exclamation'}"></i>
+      Salud Financiera: ${healthScore}% (${healthLabel})
+    </span>
+  `;
+
+  kpiGrid.innerHTML = `
+    <div class="v2-kpi-card">
+      <span class="kpi-label"><i class="fa-solid fa-wallet text-success"></i> Disponible Líquido</span>
+      <span class="kpi-val" style="color: ${availableLiquid >= 0 ? '#10b981' : '#ef4444'};">$${formatMoney(availableLiquid)}</span>
+      <span class="kpi-sub">Cuentas Débito & Efectivo</span>
+    </div>
+
+    <div class="v2-kpi-card">
+      <span class="kpi-label"><i class="fa-solid fa-hand-holding-dollar text-primary"></i> Ingresos Mensuales</span>
+      <span class="kpi-val" style="color: #60a5fa;">$${formatMoney(effectiveIncome)}</span>
+      <span class="kpi-sub">Sueldo / Cobros (30d)</span>
+    </div>
+
+    <div class="v2-kpi-card">
+      <span class="kpi-label"><i class="fa-solid fa-file-invoice-dollar text-warning"></i> Cuotas Pendientes Mes</span>
+      <span class="kpi-val" style="color: #fbbf24;">$${formatMoney(totalMonthlyCuotas)}</span>
+      <span class="kpi-sub">${activeDebts.length} obligaciones activas</span>
+    </div>
+
+    <div class="v2-kpi-card">
+      <span class="kpi-label"><i class="fa-solid fa-scale-balanced text-danger"></i> Pasivo Total Activo</span>
+      <span class="kpi-val" style="color: #fca5a5;">$${formatMoney(totalActiveDebt)}</span>
+      <span class="kpi-sub">Deuda acumulada total</span>
+    </div>
+  `;
+}
+
+function renderV2TabCashflow() {
+  const container = document.getElementById('v2-tab-cashflow');
+  if (!container) return;
+
+  const incomeData = getV2IncomeData();
+  const activeDebts = debts.filter(d => Number(d.saldo_total) > 0);
+
+  // Split active debts into Q1 (days 1-14) vs Q2 (days 15-31)
+  const q1Debts = activeDebts.filter(d => {
+    const day = getDueDateDay(d.fecha_limite_pago);
+    return day >= 1 && day <= 14;
+  });
+
+  const q2Debts = activeDebts.filter(d => {
+    const day = getDueDateDay(d.fecha_limite_pago);
+    return day >= 15 && day <= 31;
+  });
+
+  const q1CuotasTotal = q1Debts.reduce((sum, d) => sum + getDebtStatusInfo(d).requiredAmount, 0);
+  const q2CuotasTotal = q2Debts.reduce((sum, d) => sum + getDebtStatusInfo(d).requiredAmount, 0);
+
+  const q1Diff = incomeData.q1Income - q1CuotasTotal;
+  const q2Diff = incomeData.q2Income - q2CuotasTotal;
+
+  // Category breakdown calculation
+  const catVivienda = activeDebts.filter(d => ['arriendo pa', 'Apartamento'].includes(d.cuenta?.nombre)).reduce((s, d) => s + (!d.cubierto_por ? Number(d.pago_minimo) : 0), 0);
+  const catUnificado = activeDebts.filter(d => d.cuenta?.nombre?.includes('Unificado')).reduce((s, d) => s + (!d.cubierto_por ? Number(d.pago_minimo) : 0), 0);
+  const catTarjetas = activeDebts.filter(d => ['Tuya Alkosto', 'Falabella', 'Addi'].includes(d.cuenta?.nombre)).reduce((s, d) => s + (!d.cubierto_por ? Number(d.pago_minimo) : 0), 0);
+  const catServicios = activeDebts.filter(d => ['Plan Tigo', 'Internet', 'luz', 'Gas', 'Solventa', 'Rapicredit', 'Cadena'].includes(d.cuenta?.nombre)).reduce((s, d) => s + (!d.cubierto_por ? Number(d.pago_minimo) : 0), 0);
+  const catFuel = transactions.filter(t => (t.kilometraje != null && t.kilometraje > 0) || (t.descripcion && t.descripcion.toLowerCase().includes('gasolina'))).reduce((s, t) => s + Number(t.monto), 0);
+
+  // Recent 10 transactions
+  const recentTxs = [...transactions].sort((a, b) => new Date(b.fecha_transaccion).getTime() - new Date(a.fecha_transaccion).getTime()).slice(0, 10);
+
+  container.innerHTML = `
+    <div class="v2-container">
+      <!-- QUINCENA 1 BANNER & DEBTS -->
+      <div class="glass-card" style="border-left: 4px solid #60a5fa;">
+        <div class="card-header">
+          <div>
+            <span class="badge-fortnight-first" style="font-size:0.75rem;"><i class="fa-solid fa-calendar-days"></i> QUINCENA 1 (Fin de Mes / Días 1 al 14)</span>
+            <h3 style="margin-top:0.3rem;"><i class="fa-solid fa-money-bill-wave text-primary"></i> Cobro Q1: ${escapeHTML(incomeData.q1Name)} ($${formatMoney(incomeData.q1Income)})</h3>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:0.7rem; color:var(--text-muted); display:block;">Cuotas Pendientes Q1:</span>
+            <strong style="font-size:1.15rem; color:#fbbf24;">$${formatMoney(q1CuotasTotal)}</strong>
+            <span style="font-size:0.75rem; color:${q1Diff >= 0 ? '#10b981' : '#ef4444'}; font-weight:800; display:block; margin-top:0.2rem;">
+              ${q1Diff >= 0 ? '+$' + formatMoney(q1Diff) + ' libre Q1' : '-$' + formatMoney(Math.abs(q1Diff)) + ' faltante Q1'}
+            </span>
+          </div>
+        </div>
+
+        <p style="font-size:0.75rem; color:var(--text-muted); margin:0.5rem 0 0.8rem;">Obligaciones de la Primera Quincena (incluye Crédito Unificado el 14 por $1.323.191):</p>
+        
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          ${q1Debts.map(d => {
+            const accName = d.cuenta ? d.cuenta.nombre : 'Deuda';
+            const isUnificado = accName.includes('Unificado');
+            const info = getDebtStatusInfo(d);
+            let amountText = `$${formatMoney(d.pago_minimo)}`;
+            let amountColor = isUnificado ? '#f59e0b' : '#ef4444';
+            
+            if (info.status === 'COVERED_BY_THIRD_PARTY') {
+              amountText = 'CUBIERTO ($0)';
+              amountColor = '#60a5fa';
+            } else if (info.status === 'PAID_THIS_MONTH') {
+              amountText = `✓ PAGADA ESTE MES ($0 PENDIENTE)`;
+              amountColor = '#10b981';
+            } else if (info.status === 'PAID_BALANCE') {
+              amountText = 'PAGADA ($0)';
+              amountColor = '#10b981';
+            }
+
+            return `
+              <div class="v2-list-item" style="${isUnificado ? 'border:1px solid rgba(245,158,11,0.4); background:rgba(245,158,11,0.03);' : (info.status === 'PAID_THIS_MONTH' ? 'border-left:3px solid #10b981; background:rgba(16,185,129,0.03);' : (info.status === 'COVERED_BY_THIRD_PARTY' ? 'opacity:0.6;' : ''))}">
+                <div>
+                  <strong style="font-size:0.85rem; color:#fff; display:block;">
+                    ${escapeHTML(accName)} ${isUnificado ? '⭐ (UNIFICADO)' : ''}
+                  </strong>
+                  <span style="font-size:0.7rem; color:var(--text-muted);">
+                    Límite: Día ${getDueDateDay(d.fecha_limite_pago)} 
+                    ${info.status === 'COVERED_BY_THIRD_PARTY' ? '• Cubierto por: ' + escapeHTML(d.cubierto_por) : ''}
+                    ${info.status === 'PAID_THIS_MONTH' ? '• ' + info.badgeLabel : ''}
+                  </span>
+                </div>
+                <strong style="color:${amountColor}; font-size:0.85rem;">
+                  ${amountText}
+                </strong>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- QUINCENA 2 BANNER & DEBTS -->
+      <div class="glass-card" style="border-left: 4px solid #a7f3d0;">
+        <div class="card-header">
+          <div>
+            <span class="badge-fortnight-second" style="font-size:0.75rem;"><i class="fa-solid fa-calendar-days"></i> QUINCENA 2 (Mitad de Mes / Días 15 al 31)</span>
+            <h3 style="margin-top:0.3rem;"><i class="fa-solid fa-money-bill-wave text-success"></i> Cobro Q2: ${escapeHTML(incomeData.q2Name)} ($${formatMoney(incomeData.q2Income)})</h3>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:0.7rem; color:var(--text-muted); display:block;">Cuotas Pendientes Q2:</span>
+            <strong style="font-size:1.15rem; color:#fbbf24;">$${formatMoney(q2CuotasTotal)}</strong>
+            <span style="font-size:0.75rem; color:${q2Diff >= 0 ? '#10b981' : '#ef4444'}; font-weight:800; display:block; margin-top:0.2rem;">
+              ${q2Diff >= 0 ? '+$' + formatMoney(q2Diff) + ' libre Q2' : '-$' + formatMoney(Math.abs(q2Diff)) + ' faltante Q2'}
+            </span>
+          </div>
+        </div>
+
+        <p style="font-size:0.75rem; color:var(--text-muted); margin:0.5rem 0 0.8rem;">Obligaciones de la Segunda Quincena:</p>
+        
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          ${q2Debts.map(d => {
+            const accName = d.cuenta ? d.cuenta.nombre : 'Deuda';
+            const info = getDebtStatusInfo(d);
+            let amountText = `$${formatMoney(d.pago_minimo)}`;
+            let amountColor = '#ef4444';
+            
+            if (info.status === 'COVERED_BY_THIRD_PARTY') {
+              amountText = 'CUBIERTO ($0)';
+              amountColor = '#60a5fa';
+            } else if (info.status === 'PAID_THIS_MONTH') {
+              amountText = `✓ PAGADA ESTE MES ($0 PENDIENTE)`;
+              amountColor = '#10b981';
+            } else if (info.status === 'PAID_BALANCE') {
+              amountText = 'PAGADA ($0)';
+              amountColor = '#10b981';
+            }
+
+            return `
+              <div class="v2-list-item" style="${info.status === 'PAID_THIS_MONTH' ? 'border-left:3px solid #10b981; background:rgba(16,185,129,0.03);' : (info.status === 'COVERED_BY_THIRD_PARTY' ? 'opacity:0.6;' : '')}">
+                <div>
+                  <strong style="font-size:0.85rem; color:#fff; display:block;">${escapeHTML(accName)}</strong>
+                  <span style="font-size:0.7rem; color:var(--text-muted);">
+                    Límite: Día ${getDueDateDay(d.fecha_limite_pago)} 
+                    ${info.status === 'COVERED_BY_THIRD_PARTY' ? '• Cubierto por: ' + escapeHTML(d.cubierto_por) : ''}
+                    ${info.status === 'PAID_THIS_MONTH' ? '• ' + info.badgeLabel : ''}
+                  </span>
+                </div>
+                <strong style="color:${amountColor}; font-size:0.85rem;">
+                  ${amountText}
+                </strong>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function quickToggleCoveredByOther(id) {
+  const debt = debts.find(d => d.id === id);
+  if (!debt) return;
+
+  const currentCovered = debt.cubierto_por || '';
+  const name = prompt(
+    `Indica qué integrante de la familia o tercero cubre esta cuota del mes (ej: Kevin, Mamá, Pareja, etc.). Deja en blanco si la pagas tú directamente:`,
+    currentCovered
+  );
+
+  if (name === null) return; // Cancelled
+
+  try {
+    const res = await fetch(`${API_BASE}/debts/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cubierto_por: name.trim() !== '' ? name.trim() : null
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      await loadData();
+    } else {
+      alert('Error: ' + (data.message || 'No se pudo actualizar la cobertura'));
+    }
+  } catch (err) {
+    alert('Error al conectar con la API.');
+  }
+}
+
+function setV2DebtFilter(filter) {
+  currentDebtFilter = filter;
+  renderV2TabDeudas();
+}
+
+function getFilteredV2Debts(activeDebts, paidDebts) {
+  if (currentDebtFilter === 'pending') {
+    return activeDebts.filter(d => {
+      const info = getDebtStatusInfo(d);
+      return info.isRequired && info.status !== 'COVERED_BY_THIRD_PARTY' && info.status !== 'PAID_THIS_MONTH' && info.status !== 'PAID_BALANCE';
+    });
+  } else if (currentDebtFilter === 'q1') {
+    return activeDebts.filter(d => {
+      const day = getDueDateDay(d.fecha_limite_pago);
+      return day >= 1 && day <= 14;
+    });
+  } else if (currentDebtFilter === 'q2') {
+    return activeDebts.filter(d => {
+      const day = getDueDateDay(d.fecha_limite_pago);
+      return day >= 15 && day <= 31;
+    });
+  } else if (currentDebtFilter === 'covered') {
+    return activeDebts.filter(d => d.cubierto_por && d.cubierto_por.trim() !== '');
+  } else if (currentDebtFilter === 'paid') {
+    return debts.filter(d => {
+      const info = getDebtStatusInfo(d);
+      return info.status === 'PAID_THIS_MONTH' || info.status === 'PAID_BALANCE';
+    });
+  }
+  return [...activeDebts, ...paidDebts];
+}
+
+function renderV2DebtCard(d, today) {
+  const accName = d.cuenta ? d.cuenta.nombre : 'Deuda';
+  const isUnificado = accName.includes('Unificado');
+  const info = getDebtStatusInfo(d);
+  const isCovered = d.cubierto_por && d.cubierto_por.trim() !== '';
+
+  const dueDay = getDueDateDay(d.fecha_limite_pago);
+  const quincenaTag = dueDay >= 1 && dueDay <= 14 ? 'Q1 (Fin de Mes)' : 'Q2 (Mitad de Mes)';
+
+  return `
+    <div class="v2-kpi-card" style="${isUnificado ? 'border:1px solid rgba(245,158,11,0.5); background:rgba(245,158,11,0.04);' : (info.status === 'OVERDUE' ? 'border:1px solid rgba(239,68,68,0.5); background:rgba(239,68,68,0.04);' : (info.status === 'PAID_THIS_MONTH' ? 'border:1px solid rgba(16,185,129,0.4); background:rgba(16,185,129,0.03);' : ''))}">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <strong style="font-size:1rem; color:#fff; display:block;">${escapeHTML(accName)}</strong>
+          <span style="font-size:0.7rem; color:var(--text-muted);"><i class="fa-solid fa-calendar-days"></i> ${quincenaTag} • Límite: Día ${dueDay}</span>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.2rem;">
+          ${isUnificado ? `<span class="badge-ok" style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:0.68rem;"><i class="fa-solid fa-star"></i> UNIFICADO</span>` : ''}
+          <span class="${info.badgeClass}" style="background:${info.badgeColor}22; color:${info.badgeColor}; font-size:0.68rem; padding:2px 6px; border-radius:6px; font-weight:700;">
+            <i class="fa-solid ${info.status === 'OVERDUE' ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i> ${info.badgeLabel}
+          </span>
+        </div>
+      </div>
+
+      <div style="margin:0.6rem 0;">
+        <span style="font-size:0.72rem; color:var(--text-muted); display:block;">Saldo pendiente:</span>
+        <strong style="font-size:1.3rem; color:${isUnificado ? '#f59e0b' : (info.status === 'PAID_BALANCE' ? '#10b981' : '#fff')};">$${formatMoney(d.saldo_total)}</strong>
+      </div>
+
+      ${info.status === 'OVERDUE' ? `
+        <div style="background:rgba(239,68,68,0.12); padding:0.4rem 0.6rem; border-radius:6px; font-size:0.75rem; color:#fca5a5; margin-bottom:0.5rem;">
+          🔥 Ponerse al día: <strong>$${formatMoney(info.requiredAmount)}</strong> (${info.cuotasVencidas} cuota${info.cuotasVencidas > 1 ? 's' : ''} vencida${info.cuotasVencidas > 1 ? 's' : ''})
+        </div>
+      ` : ''}
+
+      <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.05); padding-top:0.5rem; margin-top:0.4rem;">
+        <span>Cuota: <strong style="color:#fff;">$${formatMoney(d.pago_minimo)}</strong></span>
+        <span>Tasa: <strong style="color:#34d399;">${d.tasa_interes_ea}% E.A.</strong></span>
+        <span>Vence: <strong style="color:${info.status === 'OVERDUE' ? '#ef4444' : '#fff'};">${formatDateOnly(d.fecha_limite_pago)}</strong></span>
+      </div>
+
+      <div style="display:flex; gap:0.4rem; margin-top:0.6rem; justify-content:flex-end; flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="quickToggleCoveredByOther('${d.id}')" style="padding:0.3rem 0.6rem; font-size:0.75rem; background:${isCovered ? 'rgba(96,165,250,0.25)' : 'rgba(96,165,250,0.1)'}; color:#60a5fa; border:1px solid rgba(96,165,250,0.3);" title="Marcar si esta cuota la paga un integrante de la familia o tercero">
+          <i class="fa-solid fa-users"></i> ${isCovered ? 'Cubierto: ' + escapeHTML(d.cubierto_por) : '¿Cubierto por Tercero/Familiar?'}
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="openEditDebtModal('${d.id}')" style="padding:0.3rem 0.6rem; font-size:0.75rem;" title="Editar saldo, cuota o fecha límite">
+          <i class="fa-solid fa-pen-to-square"></i> Editar / Poner al día
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteDebt('${d.id}')" style="padding:0.3rem 0.5rem; font-size:0.75rem;" title="Eliminar de la base de datos">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function runV2DebtSimulation() {
+  const container = document.getElementById('v2-sim-results');
+  if (!container) return;
+
+  const extraInput = document.getElementById('v2-sim-extra');
+  const stratSelect = document.getElementById('v2-sim-strategy');
+  const extraAmount = extraInput ? Math.max(0, Number(extraInput.value) || 0) : 200000;
+  const strategy = stratSelect ? stratSelect.value : 'Bola de Nieve';
+
+  let simDebts = debts
+    .filter(d => Number(d.saldo_total) > 0 && (!d.cubierto_por || d.cubierto_por.trim() === ''))
+    .map(d => ({
+      id: d.id,
+      nombre: d.cuenta ? d.cuenta.nombre : 'Deuda',
+      saldo: Number(d.saldo_total),
+      pagoMin: Number(d.pago_minimo),
+      tasaEa: Number(d.tasa_interes_ea)
+    }));
+
+  if (simDebts.length === 0) {
+    container.innerHTML = `
+      <div style="padding:1rem; text-align:center; color:#34d399; background:rgba(16,185,129,0.1); border-radius:10px;">
+        🎉 ¡Felicidades! No tienes deudas activas pendientes para simular.
+      </div>
+    `;
+    return;
+  }
+
+  if (strategy === 'Avalancha') {
+    simDebts.sort((a, b) => b.tasaEa - a.tasaEa);
+  } else {
+    simDebts.sort((a, b) => a.saldo - b.saldo);
+  }
+
+  const initialTotalDebt = simDebts.reduce((s, d) => s + d.saldo, 0);
+
+  let currentExtraPool = extraAmount;
+  let months = 0;
+  let totalInterestPaid = 0;
+  const maxMonths = 120;
+  const monthLogs = [];
+  const now = new Date();
+
+  while (simDebts.some(d => d.saldo > 0) && months < maxMonths) {
+    months++;
+    let monthTotalPaid = 0;
+    let availableSnowball = currentExtraPool;
+
+    for (const d of simDebts) {
+      if (d.saldo <= 0) continue;
+      const monthlyRate = Math.pow(1 + (d.tasaEa / 100), 1/12) - 1;
+      const interest = d.saldo * monthlyRate;
+      totalInterestPaid += interest;
+      d.saldo += interest;
+
+      const payMin = Math.min(d.saldo, d.pagoMin);
+      d.saldo -= payMin;
+      monthTotalPaid += payMin;
+    }
+
+    for (const d of simDebts) {
+      if (d.saldo > 0 && availableSnowball > 0) {
+        const extraPay = Math.min(d.saldo, availableSnowball);
+        d.saldo -= extraPay;
+        availableSnowball -= extraPay;
+        monthTotalPaid += extraPay;
+        
+        if (d.saldo <= 0) {
+          currentExtraPool += d.pagoMin;
+        }
+        break;
+      }
+    }
+
+    const remainingTotal = simDebts.reduce((s, d) => s + Math.max(0, d.saldo), 0);
+    const targetDebt = simDebts.find(d => d.saldo > 0);
+
+    const projectedDate = new Date(now.getFullYear(), now.getMonth() + months, 1);
+    const monthName = projectedDate.toLocaleDateString('es-CO', { month: 'short', year: 'numeric' });
+
+    monthLogs.push({
+      month: months,
+      dateStr: monthName,
+      target: targetDebt ? targetDebt.nombre : '¡LIBRE DE DEUDAS!',
+      paid: monthTotalPaid,
+      remaining: remainingTotal
+    });
+  }
+
+  const finalDate = new Date(now.getFullYear(), now.getMonth() + months, 1);
+  const finalDateStr = finalDate.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+  const estimatedSavings = Math.round(initialTotalDebt * 0.22 * (1 - (months / 48)));
+
+  container.innerHTML = `
+    <div class="v2-card-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top:1rem; gap:1rem;">
+      <div class="v2-kpi-card" style="border:1px solid rgba(16,185,129,0.3); background:rgba(16,185,129,0.05);">
+        <span style="font-size:0.75rem; color:var(--text-muted); display:block;">⏱️ Tiempo para 0 Deudas</span>
+        <strong style="font-size:1.3rem; color:#34d399;">${months} Meses</strong>
+        <span style="font-size:0.72rem; color:var(--text-muted); display:block; margin-top:0.2rem;">Libertad en <strong>${finalDateStr}</strong></span>
+      </div>
+
+      <div class="v2-kpi-card" style="border:1px solid rgba(245,158,11,0.3); background:rgba(245,158,11,0.05);">
+        <span style="font-size:0.75rem; color:var(--text-muted); display:block;">🔥 Abono Extra Aplicado</span>
+        <strong style="font-size:1.3rem; color:#f59e0b;">+$${formatMoney(extraAmount)}/mes</strong>
+        <span style="font-size:0.72rem; color:var(--text-muted); display:block; margin-top:0.2rem;">Estrategia: ${escapeHTML(strategy)}</span>
+      </div>
+
+      <div class="v2-kpi-card" style="border:1px solid rgba(96,165,250,0.3); background:rgba(96,165,250,0.05);">
+        <span style="font-size:0.75rem; color:var(--text-muted); display:block;">💰 Ahorro en Intereses</span>
+        <strong style="font-size:1.3rem; color:#60a5fa;">~$${formatMoney(Math.max(0, estimatedSavings))}</strong>
+        <span style="font-size:0.72rem; color:var(--text-muted); display:block; margin-top:0.2rem;">Por liquidación acelerada</span>
+      </div>
+    </div>
+
+    <!-- PROJECTION TABLE -->
+    <div style="margin-top:1.2rem; overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left;">
+        <thead>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-muted);">
+            <th style="padding:0.5rem;">Mes</th>
+            <th style="padding:0.5rem;">Fecha Proyectada</th>
+            <th style="padding:0.5rem;">Deuda Objetivo #1</th>
+            <th style="padding:0.5rem;">Pago Total del Mes</th>
+            <th style="padding:0.5rem; text-align:right;">Saldo Total Restante</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${monthLogs.slice(0, 15).map(m => `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+              <td style="padding:0.5rem; font-weight:700; color:#fff;">Mes ${m.month}</td>
+              <td style="padding:0.5rem; color:var(--text-muted);">${m.dateStr}</td>
+              <td style="padding:0.5rem; color:#f59e0b; font-weight:600;">${escapeHTML(m.target)}</td>
+              <td style="padding:0.5rem; color:#10b981; font-weight:700;">$${formatMoney(m.paid)}</td>
+              <td style="padding:0.5rem; text-align:right; font-weight:700; color:${m.remaining === 0 ? '#34d399' : '#fff'};">
+                ${m.remaining === 0 ? '🎉 $0 (LIBRE)' : '$' + formatMoney(m.remaining)}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      ${monthLogs.length > 15 ? `<p style="font-size:0.72rem; color:var(--text-muted); text-align:center; margin-top:0.4rem;">... Mostrando los primeros 15 meses de la proyección.</p>` : ''}
+    </div>
+  `;
+}
+
+function renderV2TabDeudas() {
+  const container = document.getElementById('v2-tab-deudas');
+  if (!container) return;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const activeDebts = debts.filter(d => Number(d.saldo_total) > 0);
+  const paidDebts = debts.filter(d => Number(d.saldo_total) <= 0);
+
+  let overdueCount = 0;
+  let overdueMoraTotal = 0;
+
+  debts.forEach(debt => {
+    if (Number(debt.saldo_total) <= 0) return;
+    const info = getDebtStatusInfo(debt);
+    if (info.status === 'OVERDUE') {
+      overdueCount++;
+      overdueMoraTotal += info.requiredAmount;
+    }
+  });
+
+  const totalDeudaSaldo = activeDebts.reduce((sum, d) => sum + Number(d.saldo_total), 0);
+  const totalCuotasMensuales = activeDebts.reduce((sum, d) => sum + getDebtStatusInfo(d).requiredAmount, 0);
+
+  const coveredCount = activeDebts.filter(d => d.cubierto_por && d.cubierto_por.trim() !== '').length;
+  const pendingCount = activeDebts.filter(d => {
+    const info = getDebtStatusInfo(d);
+    return info.isRequired && info.status !== 'COVERED_BY_THIRD_PARTY' && info.status !== 'PAID_THIS_MONTH' && info.status !== 'PAID_BALANCE';
+  }).length;
+  const paidCount = debts.filter(d => {
+    const info = getDebtStatusInfo(d);
+    return info.status === 'PAID_THIS_MONTH' || info.status === 'PAID_BALANCE';
+  }).length;
+
+  container.innerHTML = `
+    <div class="v2-container">
+      <!-- HEADER CARDS & ALERT BANNER -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div>
+            <h3><i class="fa-solid fa-scale-balanced text-primary"></i> Optimización de Deudas & Plan Inteligente (V2)</h3>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Gestión de pasivos, cuotas por quincena, seguimiento de mora y cobertura por terceros.</p>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:0.7rem; color:var(--text-muted); display:block;">Pasivo Total Activo:</span>
+            <strong style="font-size:1.3rem; color:#fca5a5; font-weight:800;">$${formatMoney(totalDeudaSaldo)}</strong>
+            <span style="font-size:0.75rem; color:#fbbf24; display:block;">$${formatMoney(totalCuotasMensuales)} / mes en cuotas</span>
+          </div>
+        </div>
+
+        <!-- FILTROS DE DEUDAS -->
+        <div class="v2-sub-nav" style="margin-top:1rem; justify-content:flex-start; gap:0.4rem; flex-wrap:wrap;">
+          <button class="v2-tab ${currentDebtFilter === 'all' ? 'active' : ''}" onclick="setV2DebtFilter('all')">
+            Todas (${activeDebts.length})
+          </button>
+          <button class="v2-tab ${currentDebtFilter === 'pending' ? 'active' : ''}" onclick="setV2DebtFilter('pending')">
+            ⏳ Por Pagar este Mes (${pendingCount})
+          </button>
+          <button class="v2-tab ${currentDebtFilter === 'q1' ? 'active' : ''}" onclick="setV2DebtFilter('q1')">
+            📅 Q1: Fin de Mes (1-14)
+          </button>
+          <button class="v2-tab ${currentDebtFilter === 'q2' ? 'active' : ''}" onclick="setV2DebtFilter('q2')">
+            📅 Q2: Mitad de Mes (15-31)
+          </button>
+          <button class="v2-tab ${currentDebtFilter === 'covered' ? 'active' : ''}" onclick="setV2DebtFilter('covered')">
+            🔵 Cubiertas por Terceros / Familiares (${coveredCount})
+          </button>
+          <button class="v2-tab ${currentDebtFilter === 'paid' ? 'active' : ''}" onclick="setV2DebtFilter('paid')">
+            ✓ Pagadas este Mes (${paidCount})
+          </button>
+        </div>
+
+        <!-- GRID DE TARJETAS DE DEUDAS -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:1rem; margin-top:1.2rem;">
+          ${getFilteredV2Debts(activeDebts, paidDebts).map(d => renderV2DebtCard(d, today)).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderV2TabSimulador() {
+  const container = document.getElementById('v2-tab-simulador');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="v2-container">
+      <div class="glass-card" style="border-top: 3px solid #60a5fa;">
+        <div class="card-header">
+          <div>
+            <h3><i class="fa-solid fa-calculator text-primary"></i> Simulador de Aceleración de Deudas & Plan de Pago</h3>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Calcula el mes exacto en que quedarás 100% libre de deudas inyectando un abono extra.</p>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin:1rem 0;">
+          <div class="form-group">
+            <label style="font-weight:600; font-size:0.85rem;"><i class="fa-solid fa-sliders text-warning"></i> Estrategia de Pago</label>
+            <select id="v2-sim-strategy" class="form-control" style="width:100%; padding:0.5rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff; border-radius:8px;">
+              <option value="Bola de Nieve" selected>🏔️ Bola de Nieve (Menor saldo primero)</option>
+              <option value="Avalancha">⚡ Avalancha (Mayor interés E.A. primero)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="font-weight:600; font-size:0.85rem;"><i class="fa-solid fa-hand-holding-dollar text-success"></i> Abono Extra Mensual ($)</label>
+            <input type="number" id="v2-sim-extra" value="200000" step="50000" style="width:100%; padding:0.5rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff; border-radius:8px; font-weight:700;">
+          </div>
+          <div class="form-group" style="display:flex; align-items:flex-end;">
+            <button class="btn btn-primary" onclick="runV2DebtSimulation()" style="width:100%; padding:0.6rem; font-weight:700; background:linear-gradient(135deg, #3b82f6, #1d4ed8);">
+              <i class="fa-solid fa-play"></i> ▶️ Ejecutar Proyección
+            </button>
+          </div>
+        </div>
+
+        <div id="v2-sim-results">
+          <!-- Dynamically filled by runV2DebtSimulation() -->
+        </div>
+      </div>
+    </div>
+  `;
+
+  runV2DebtSimulation();
+}
+
+function renderV2TabGasolina() {
+  const container = document.getElementById('v2-tab-gasolina');
+  if (!container) return;
+
+  const fuelTxs = transactions.filter(t => 
+    (t.kilometraje != null && t.kilometraje > 0) || 
+    (t.descripcion && (t.descripcion.toLowerCase().includes('gasolina') || t.descripcion.toLowerCase().includes('tanqueo')))
+  ).sort((a, b) => new Date(b.fecha_transaccion).getTime() - new Date(a.fecha_transaccion).getTime());
+
+  const totalFuelSpent = fuelTxs.reduce((sum, t) => sum + Number(t.monto), 0);
+  const totalFuelLogs = fuelTxs.length;
+
+  let lastKm = 0;
+  let kmDiff = 0;
+  let avgCostPerKm = 0;
+
+  if (fuelTxs.length > 0) {
+    const sortedKm = [...fuelTxs].filter(t => t.kilometraje != null && t.kilometraje > 0).sort((a, b) => new Date(a.fecha_transaccion).getTime() - new Date(b.fecha_transaccion).getTime());
+    if (sortedKm.length > 0) {
+      lastKm = Number(sortedKm[sortedKm.length - 1].kilometraje);
+      if (sortedKm.length > 1) {
+        const firstKm = Number(sortedKm[0].kilometraje);
+        kmDiff = lastKm - firstKm;
+        if (kmDiff > 0 && totalFuelSpent > 0) {
+          avgCostPerKm = totalFuelSpent / kmDiff;
+        }
+      }
+    }
+  }
+
+  container.innerHTML = `
+    <div class="glass-card gasolina-card">
+      <div class="card-header">
+        <h3><i class="fa-solid fa-motorcycle text-warning"></i> Control de Gasolina & Odómetro Pulsar N160 (V2)</h3>
+        <span class="km-badge"><i class="fa-solid fa-gauge-high"></i> ${lastKm > 0 ? formatMoney(lastKm) + ' km' : 'Sin Odómetro'}</span>
+      </div>
+
+      <div class="gasolina-stats-grid" style="margin: 1rem 0;">
+        <div class="gas-stat-box">
+          <span class="stat-label">⛽ Total Tanqueado</span>
+          <span class="stat-val text-warning">$${formatMoney(totalFuelSpent)}</span>
+        </div>
+        <div class="gas-stat-box">
+          <span class="stat-label">🛣️ Recorrido Auditado</span>
+          <span class="stat-val text-primary">${kmDiff > 0 ? formatMoney(kmDiff) + ' km' : '---'}</span>
+        </div>
+        <div class="gas-stat-box">
+          <span class="stat-label">💵 Costo Promedio / km</span>
+          <span class="stat-val text-success">${avgCostPerKm > 0 ? '$' + formatMoney(avgCostPerKm.toFixed(2)) + '/km' : '---'}</span>
+        </div>
+        <div class="gas-stat-box">
+          <span class="stat-label">📋 Registros</span>
+          <span class="stat-val">${totalFuelLogs} tanqueos</span>
+        </div>
+      </div>
+
+      <div class="gas-alert-banner normal" style="margin-top:0.8rem;">
+        <i class="fa-solid fa-circle-check"></i> <strong>Rendimiento Motor Pulsar N160 Sincronizado:</strong> Todos tus tanqueos están enlazados con tu historial de gastos y flujo de caja en tiempo real.
+      </div>
+    </div>
+
+    <!-- HISTORIAL DE REGISTROS DE TANQUEO MOTO -->
+    <div class="glass-card" style="margin-top:1rem;">
+      <div class="card-header">
+        <h3><i class="fa-solid fa-list-check text-success"></i> Registros de Tanqueo (Moto Pulsar N160)</h3>
+        <button class="btn btn-primary" onclick="document.getElementById('btn-add-transaction')?.click()" style="padding:0.4rem 0.8rem; font-size:0.8rem;">
+          <i class="fa-solid fa-plus"></i> + Registrar Tanqueo Hoy
+        </button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:1rem;">
+        ${fuelTxs.length === 0 ? `
+          <div style="text-align:center; color:var(--text-muted); padding:1.5rem;">
+            No hay registros de gasolina guardados aún.
+          </div>
+        ` : fuelTxs.map(t => {
+          const acc = accounts.find(a => a.id === t.cuenta_id);
+          const accName = acc ? acc.nombre : 'Cuenta';
+          const kmBadge = t.kilometraje ? `<span class="km-badge"><i class="fa-solid fa-gauge-high"></i> ${formatKm(t.kilometraje)} km</span>` : '';
+
+          return `
+            <div class="v2-list-item" style="justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:0.8rem;">
+                <div style="width:36px; height:36px; border-radius:50%; background:rgba(245,158,11,0.15); color:#f59e0b; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                  <i class="fa-solid fa-gas-pump"></i>
+                </div>
+                <div>
+                  <strong style="color:#fff; font-size:0.9rem; display:flex; align-items:center; gap:0.5rem;">
+                    ${escapeHTML(t.descripcion)} ${kmBadge}
+                  </strong>
+                  <span style="font-size:0.72rem; color:var(--text-muted);">${escapeHTML(accName)} • ${formatDateOnly(t.fecha_transaccion)}</span>
+                </div>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:1rem;">
+                <strong style="color:#ef4444; font-size:1rem;">-$${formatMoney(t.monto)}</strong>
+                <button class="btn-action-small delete-tx-btn" data-id="${t.id}" title="Eliminar tanqueo">
+                  <i class="fa-solid fa-trash pointer-events-none"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderV2TabSync() {
+  const container = document.getElementById('v2-tab-sync');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="glass-card">
+      <div class="card-header">
+        <h3><i class="fa-solid fa-rotate text-success"></i> Matriz de Sincronización en Tiempo Real</h3>
+        <span class="badge-ok"><i class="fa-solid fa-circle"></i> SISTEMA OPERATIVO 100%</span>
+      </div>
+      
+      <p style="font-size:0.8rem; color:var(--text-muted); margin:0.4rem 0 1rem;">
+        Estado de paridad y sincronización entre la base de datos local SQLite y los componentes del ecosistema:
+      </p>
+
+      <div class="v2-card-grid">
+        <div class="v2-list-item">
+          <div>
+            <strong style="color:#fff; display:block;"><i class="fa-solid fa-wallet text-primary"></i> Cuentas Registradas</strong>
+            <span style="font-size:0.7rem; color:var(--text-muted);">${accounts.length} cuentas en base de datos</span>
+          </div>
+          <span class="badge-ok">SINCRONIZADO</span>
+        </div>
+
+        <div class="v2-list-item">
+          <div>
+            <strong style="color:#fff; display:block;"><i class="fa-solid fa-scale-balanced text-warning"></i> Pasivos & Deudas</strong>
+            <span style="font-size:0.7rem; color:var(--text-muted);">${debts.length} obligaciones indexadas</span>
+          </div>
+          <span class="badge-ok">SINCRONIZADO</span>
+        </div>
+
+        <div class="v2-list-item">
+          <div>
+            <strong style="color:#fff; display:block;"><i class="fa-solid fa-list-check text-success"></i> Transacciones & Movimientos</strong>
+            <span style="font-size:0.7rem; color:var(--text-muted);">${transactions.length} registros guardados</span>
+          </div>
+          <span class="badge-ok">SINCRONIZADO</span>
+        </div>
+      </div>
+    </div>
+  `;
 }

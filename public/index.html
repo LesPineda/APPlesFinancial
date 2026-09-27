@@ -59,9 +59,9 @@
 
       <!-- Top Level Main Modules Navigation -->
       <nav class="main-module-nav" aria-label="Módulos Principales de LesApp">
-        <button class="module-tab active" data-module="module-finanzas">
-          <i class="fa-solid fa-wallet"></i>
-          <span>Finanzas</span>
+        <button class="module-tab active" data-module="module-v2" style="position:relative;">
+          <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i>
+          <span>⚡ LesApp Smart Hub V2</span>
         </button>
         <button class="module-tab" data-module="module-otras-gestiones">
           <i class="fa-solid fa-folder-plus"></i>
@@ -70,7 +70,7 @@
       </nav>
 
       <!-- MODULE 1: FINANZAS (Includes all financial cards, sub-tabs, and grid) -->
-      <div id="module-finanzas" class="module-view">
+      <div id="module-finanzas" class="module-view hidden">
         <!-- Sub-Navigation Tabs for Finanzas -->
         <nav class="mobile-nav-tabs" aria-label="Navegación de secciones de Finanzas">
           <button class="nav-tab active" data-target="col-all" title="Ver todas las secciones">
@@ -367,6 +367,122 @@
       </main>
       </div> <!-- End #module-finanzas -->
 
+      <!-- MODULE V2: VERSIÓN 2.0 (INTEGRATED SMART FINANCES & REACTIVE ECOSYSTEM) -->
+      <section id="module-v2" class="module-view">
+        <div class="v2-container">
+          
+          <!-- V2 HERO SUMMARY & SYNCHRONIZED HEALTH SCORE -->
+          <div class="glass-card v2-hero-card">
+            <div class="v2-hero-header">
+              <div>
+                <span class="v2-badge-tag"><i class="fa-solid fa-bolt text-warning"></i> ECOSISTEMA INTEGRADO V2.0</span>
+                <h2 style="font-size: 1.4rem; color: #fff; margin: 0.3rem 0;"><i class="fa-solid fa-shield-halved text-primary"></i> Diagnostic & Sync Engine V2</h2>
+                <p style="color: var(--text-muted); font-size: 0.82rem; margin: 0;">Sincronización en tiempo real de Ingresos, Gastos, Crédito Unificado y Tanqueo Pulsar N160.</p>
+              </div>
+              <div id="v2-health-score-box" class="v2-score-box">
+                <!-- Dynamically populated score badge -->
+              </div>
+            </div>
+
+            <!-- V2 Synchronized KPI Grid -->
+            <div id="v2-kpi-grid" class="v2-kpi-grid">
+              <!-- Dynamically populated KPI metrics -->
+            </div>
+          </div>
+
+          <!-- V2 DESGLOSE POR CATEGORÍA (TOGETHER WITH HERO CARD) -->
+          <div id="v2-category-breakdown">
+            <!-- Dynamically populated by renderV2CategoryBreakdown() -->
+          </div>
+
+          <!-- V2 ACTIONS AND SUB-MODULE NAVIGATION BAR (TOGETHER) -->
+          <div style="margin-top: 1rem; display:flex; flex-direction:column; gap:0.6rem;">
+            <!-- V2 QUICK ACTIONS TOOLBAR -->
+            <div class="v2-quick-actions-bar" style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+              <button id="v2-btn-add-tx" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #10b981, #059669); border:none; font-weight:700; padding:0.55rem 1rem;">
+                <i class="fa-solid fa-plus"></i> + Registrar Movimiento (Ingreso/Gasto)
+              </button>
+              <button id="v2-btn-add-fuel" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #f59e0b, #d97706); border:none; font-weight:700; padding:0.55rem 1rem;">
+                <i class="fa-solid fa-gas-pump"></i> + Tanqueo Pulsar N160
+              </button>
+              <button id="v2-btn-add-debt" class="btn btn-secondary btn-sm" style="border:1px solid rgba(255,255,255,0.15); font-weight:600; padding:0.55rem 1rem;">
+                <i class="fa-solid fa-file-invoice-dollar"></i> + Agregar Obligación / Deuda
+              </button>
+            </div>
+
+            <!-- V2 SUB-MODULE NAVIGATION TABS -->
+            <nav class="v2-sub-nav">
+              <button class="v2-tab active" data-v2tab="v2-tab-cashflow">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Ingresos vs Gastos V2</span>
+              </button>
+              <button class="v2-tab" data-v2tab="v2-tab-deudas">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <span>Deudas & Plan Inteligente</span>
+              </button>
+              <button class="v2-tab" data-v2tab="v2-tab-simulador">
+                <i class="fa-solid fa-calculator"></i>
+                <span>Simulador de Aceleración</span>
+              </button>
+              <button class="v2-tab" data-v2tab="v2-tab-gasolina">
+                <i class="fa-solid fa-gas-pump"></i>
+                <span>Gasolina Pulsar N160 V2</span>
+              </button>
+              <button class="v2-tab" data-v2tab="v2-tab-movimientos">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Historial de Movimientos</span>
+              </button>
+              <button class="v2-tab" data-v2tab="v2-tab-sync">
+                <i class="fa-solid fa-rotate"></i>
+                <span>Sincronización & Registros</span>
+              </button>
+            </nav>
+          </div>
+
+          <!-- V2 TAB 1: INGRESOS Y GASTOS -->
+          <div id="v2-tab-cashflow" class="v2-subview">
+            <!-- Dynamically populated cashflow analysis -->
+          </div>
+
+          <!-- V2 TAB 2: DEUDAS Y PLAN INTELIGENTE -->
+          <div id="v2-tab-deudas" class="v2-subview hidden">
+            <!-- Dynamically populated smart debt plan -->
+          </div>
+
+          <!-- V2 TAB 3: SIMULADOR DE ACELERACIÓN -->
+          <div id="v2-tab-simulador" class="v2-subview hidden">
+            <!-- Dynamically populated smart debt acceleration simulator -->
+          </div>
+
+          <!-- V2 TAB 4: GASOLINA PULSAR N160 -->
+          <div id="v2-tab-gasolina" class="v2-subview hidden">
+            <!-- Dynamically populated gas efficiency hub -->
+          </div>
+
+          <!-- V2 TAB 5: HISTORIAL DE MOVIMIENTOS -->
+          <div id="v2-tab-movimientos" class="v2-subview hidden">
+            <div class="glass-card" style="border-left: 4px solid #10b981;">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-list-check text-success"></i> Historial de Movimientos & Transacciones</h3>
+                <button class="btn btn-primary" onclick="openModal('modal-add-transaction')" style="padding:0.4rem 0.8rem; font-size:0.8rem;">
+                  <i class="fa-solid fa-plus"></i> + Nuevo Movimiento
+                </button>
+              </div>
+
+              <div id="v2-transactions-list" class="transactions-list" style="margin-top:1rem;">
+                <!-- Dynamically populated by renderTransactions() -->
+              </div>
+            </div>
+          </div>
+
+          <!-- V2 TAB 5: MATRIZ DE SINCRONIZACIÓN -->
+          <div id="v2-tab-sync" class="v2-subview hidden">
+            <!-- Dynamically populated sync matrix & quick forms -->
+          </div>
+
+        </div>
+      </section>
+
       <!-- MODULE 2: OTRAS GESTIONES (Ready for future management modules) -->
       <section id="module-otras-gestiones" class="module-view hidden">
         <div class="glass-card" style="text-align: center; padding: 2.5rem 1.25rem;">
@@ -415,6 +531,144 @@
       <div class="login-footer">
         LESAPP &copy; 2026 &bull; CONTROL DE ACCESO
       </div>
+    </div>
+  </div>
+
+  <!-- Modal: Agregar Movimiento -->
+  <div id="modal-add-transaction" class="modal-overlay hidden">
+    <div class="glass-card modal-card" style="max-width: 480px; width: 90%;">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-plus text-success"></i> Registrar Movimiento Manual</h2>
+      </div>
+      <form id="form-modal-add-transaction" class="inline-form">
+        <div class="form-group">
+          <label>Cuenta Origen / Destino</label>
+          <select id="modal-tx-cuenta" required>
+            <option value="" disabled selected>Selecciona Cuenta</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="modal-tx-tipo" required>
+              <option value="GASTO" selected>Gasto (-)</option>
+              <option value="INGRESO">Ingreso (+)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Monto ($)</label>
+            <input type="number" id="modal-tx-monto" placeholder="Ej: 50000" step="0.01" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <input type="text" id="modal-tx-descripcion" placeholder="Ej: Mercado, Sueldo, Gasolina..." required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha y Hora</label>
+            <input type="datetime-local" id="modal-tx-fecha" required>
+          </div>
+          <div class="form-group">
+            <label>Km (Opcional)</label>
+            <input type="number" id="modal-tx-km" placeholder="Ej: 28015" step="1">
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" id="btn-cancel-modal-tx" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Registrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Registrar Tanqueo Pulsar N160 -->
+  <div id="modal-add-fuel" class="modal-overlay hidden">
+    <div class="glass-card modal-card" style="max-width: 480px; width: 90%;">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-gas-pump text-warning"></i> Registrar Tanqueo Pulsar N160</h2>
+      </div>
+      <form id="form-modal-add-fuel" class="inline-form">
+        <div class="form-group">
+          <label>Cuenta de Pago</label>
+          <select id="modal-fuel-cuenta" required>
+            <option value="" disabled selected>Selecciona Cuenta</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Valor Tanqueo ($)</label>
+            <input type="number" id="modal-fuel-monto" placeholder="Ej: 45000" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Odómetro Actual (km)</label>
+            <input type="number" id="modal-fuel-km" placeholder="Ej: 28015" step="1" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Fecha y Hora</label>
+          <input type="datetime-local" id="modal-fuel-fecha" required>
+        </div>
+        <div class="form-group">
+          <label>Notas / Descripción</label>
+          <input type="text" id="modal-fuel-descripcion" value="Gasolina Moto Pulsar N160" required>
+        </div>
+        <div class="modal-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" id="btn-cancel-modal-fuel" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706); border:none;">
+            <i class="fa-solid fa-gas-pump"></i> Guardar Tanqueo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Agregar Obligación / Deuda -->
+  <div id="modal-add-debt" class="modal-overlay hidden">
+    <div class="glass-card modal-card" style="max-width: 480px; width: 90%;">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-file-invoice-dollar text-primary"></i> Nueva Obligación / Deuda</h2>
+      </div>
+      <form id="form-modal-add-debt" class="inline-form">
+        <div class="form-group">
+          <label>Asociar a Cuenta</label>
+          <select id="modal-debt-cuenta" required>
+            <option value="" disabled selected>Selecciona Cuenta</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Saldo Total ($)</label>
+            <input type="number" id="modal-debt-saldo" placeholder="Ej: 500000" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Tasa E.A. (%)</label>
+            <input type="number" id="modal-debt-tasa" placeholder="Ej: 28.15" step="0.01" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Pago Mínimo / Cuota ($)</label>
+          <input type="number" id="modal-debt-pago" placeholder="Ej: 50000" step="0.01" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha Corte</label>
+            <input type="date" id="modal-debt-corte" required>
+          </div>
+          <div class="form-group">
+            <label>Fecha Límite Pago</label>
+            <input type="date" id="modal-debt-limite" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Cubierto por tercero (Opcional)</label>
+          <input type="text" id="modal-debt-cubierto-por" placeholder="Ej: MAMA, Esposa, Empresa...">
+        </div>
+        <div class="modal-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" id="btn-cancel-modal-debt" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Crear Deuda</button>
+        </div>
+      </form>
     </div>
   </div>
 
