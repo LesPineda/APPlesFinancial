@@ -377,22 +377,30 @@ function renderDebts(prioritizationMethod) {
   let q1IncomeList = [];
   let q2IncomeList = [];
 
-  transactions.forEach(t => {
-    if (t.tipo === 'INGRESO') {
-      const amount = Number(t.monto);
-      totalIncome += amount;
-      const day = getDueDateDay(t.fecha_transaccion);
-      
-      // Clasificación inteligente de nómina por ciclo de cobro:
-      // - Cobro de Mitad de Mes (Días 15 al 24, ej: Nómina Asistia 18/8) -> Asignado a Q2 (para cuotas del 15 al 31)
-      // - Cobro de Fin / Inicio de Mes (Días 25 al 31 y 1 al 14, ej: Nómina Ortomac 28/8) -> Asignado a Q1 (para cuotas del 1 al 14)
-      if (day >= 15 && day <= 24) {
-        q2Income += amount;
-        q2IncomeList.push({ name: t.descripcion, amount });
-      } else {
-        q1Income += amount;
-        q1IncomeList.push({ name: t.descripcion, amount });
-      }
+  // Considerar solo ingresos de los últimos 30 días para no duplicar sueldos de meses anteriores
+  const thirtyDaysAgo = new Date(today);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const recentIngresos = transactions.filter(t => {
+    if (t.tipo !== 'INGRESO') return false;
+    const tDate = parseLocalDate(t.fecha_transaccion);
+    return tDate >= thirtyDaysAgo;
+  });
+
+  recentIngresos.forEach(t => {
+    const amount = Number(t.monto);
+    totalIncome += amount;
+    const day = getDueDateDay(t.fecha_transaccion);
+    
+    // Clasificación inteligente de nómina por ciclo de cobro:
+    // - Cobro de Mitad de Mes (Días 15 al 24) -> Asignado a Q2 (para cuotas del 15 al 31)
+    // - Cobro de Fin / Inicio de Mes (Días 25 al 31 y 1 al 14) -> Asignado a Q1 (para cuotas del 1 al 14)
+    if (day >= 15 && day <= 24) {
+      q2Income += amount;
+      q2IncomeList.push({ name: t.descripcion, amount });
+    } else {
+      q1Income += amount;
+      q1IncomeList.push({ name: t.descripcion, amount });
     }
   });
 
@@ -2214,36 +2222,14 @@ function openEditDebtModal(id) {
 }
 
 async function promptCoveredByOther(id) {
-  const debt = debts.find(d => d.id === id);
-  if (!debt) return;
-
-  const currentCovered = debt.cubierto_por || '';
-  const debtName = debt.cuenta ? debt.cuenta.nombre : 'esta deuda';
-  const val = prompt(
-    `Indica quién cubrió o pagará la cuota/deuda de "${debtName}" (Ej: Esposa, Mamá, Empresa):\n\n(Deja en blanco y pulsa Aceptar para quitar la marca de tercero):`,
-    currentCovered
-  );
-
-  if (val === null) return; // Cancelado
-
-  try {
-    const res = await fetch(`${API_BASE}/debts/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        cubierto_por: val.trim() !== '' ? val.trim() : null
-      })
-    });
-
-    const data = await res.json();
-    if (data.status === 'success') {
-      await loadData();
-    } else {
-      alert(`Error al actualizar cobertura: ${data.message}`);
+  openEditDebtModal(id);
+  setTimeout(() => {
+    const el = document.getElementById('edit-debt-cubierto-por');
+    if (el) {
+      el.focus();
+      el.select();
     }
-  } catch (err) {
-    alert('Error al conectar con el servidor.');
-  }
+  }, 150);
 }
 
 function setupEditDebtForm() {
