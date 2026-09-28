@@ -3365,10 +3365,15 @@ function renderV2HeroKPIs() {
   const activeDebts = debts.filter(d => Number(d.saldo_total) > 0);
   let totalActiveDebt = 0;
   let totalMonthlyCuotas = 0;
+  let pendingCuotasCount = 0;
+
   activeDebts.forEach(d => {
     totalActiveDebt += Number(d.saldo_total);
     const info = getDebtStatusInfo(d);
-    totalMonthlyCuotas += info.requiredAmount;
+    if (info.isRequired && info.status !== 'COVERED_BY_THIRD_PARTY' && info.status !== 'PAID_THIS_MONTH' && info.status !== 'PAID_BALANCE') {
+      totalMonthlyCuotas += info.requiredAmount;
+      pendingCuotasCount++;
+    }
   });
 
   // 3. Biweekly income total (Q1 + Q2)
@@ -3424,7 +3429,7 @@ function renderV2HeroKPIs() {
     <div class="v2-kpi-card">
       <span class="kpi-label"><i class="fa-solid fa-file-invoice-dollar text-warning"></i> Cuotas Pendientes Mes</span>
       <span class="kpi-val" style="color: #fbbf24;">$${formatMoney(totalMonthlyCuotas)}</span>
-      <span class="kpi-sub">${activeDebts.length} obligaciones activas</span>
+      <span class="kpi-sub">${pendingCuotasCount} cuota${pendingCuotasCount !== 1 ? 's' : ''} a tu cargo este mes</span>
     </div>
 
     <div class="v2-kpi-card">
