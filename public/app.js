@@ -3159,14 +3159,15 @@ function getDebtStatusInfo(debt) {
   const debtAccName = debt.cuenta ? debt.cuenta.nombre.toLowerCase() : '';
   const debtAccId = debt.cuenta_id;
 
-  // Search for recent payment transaction in the last 35 days
-  const thirtyFiveDaysAgo = new Date();
-  thirtyFiveDaysAgo.setDate(thirtyFiveDaysAgo.getDate() - 35);
+  // Search for payment transaction registered in the CURRENT calendar month
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
 
   const recentPaymentTx = transactions.find(t => {
     if (t.tipo !== 'GASTO') return false;
     const txDate = parseLocalDate(t.fecha_transaccion);
-    if (txDate < thirtyFiveDaysAgo) return false;
+    if (txDate.getFullYear() !== currentYear || txDate.getMonth() !== currentMonth) return false;
 
     const desc = (t.descripcion || '').toLowerCase();
     if (debtAccName) {
@@ -3634,16 +3635,16 @@ async function markDebtAsUnpaid(id) {
   }
 
   try {
-    // 1. Search for recent payment transactions in the last 35 days matching this debt
-    const thirtyFiveDaysAgo = new Date();
-    thirtyFiveDaysAgo.setDate(thirtyFiveDaysAgo.getDate() - 35);
+    // 1. Search for payment transactions in the last 60 days matching this debt to clear
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
     const debtAccName = debt.cuenta ? debt.cuenta.nombre.toLowerCase() : '';
     const debtAccId = debt.cuenta_id;
 
     const matchingTxs = transactions.filter(t => {
       if (t.tipo !== 'GASTO') return false;
       const txDate = parseLocalDate(t.fecha_transaccion);
-      if (txDate < thirtyFiveDaysAgo) return false;
+      if (txDate < sixtyDaysAgo) return false;
 
       const desc = (t.descripcion || '').toLowerCase();
       if (debtAccName) {
