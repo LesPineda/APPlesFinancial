@@ -3624,6 +3624,49 @@ function renderV2TabCashflow() {
   `;
 }
 
+async function markDebtAsUnpaid(id) {
+  const debt = debts.find(d => d.id === id);
+  if (!debt) return;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const currentLimit = parseLocalDate(debt.fecha_limite_pago);
+  currentLimit.setHours(0, 0, 0, 0);
+
+  let newLimit = new Date(currentLimit);
+
+  if (currentLimit >= today) {
+    newLimit = new Date(today);
+    newLimit.setDate(newLimit.getDate() - 1);
+  } else {
+    newLimit.setDate(newLimit.getDate() - 32);
+  }
+
+  const accName = debt.cuenta ? debt.cuenta.nombre : 'Deuda';
+  if (!confirm(`¿Deseas marcar la cuota de este mes de "${accName}" como NO PAGADA / PENDIENTE?\n\nEsto cambiará su estado a pendiente/vencida para que aparezca en tus obligaciones por pagar.`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/debts/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fecha_limite_pago: newLimit.toISOString()
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      await loadData();
+    } else {
+      alert('Error: ' + (data.message || 'No se pudo actualizar el estado de pago'));
+    }
+  } catch (err) {
+    alert('Error al conectar con la API.');
+  }
+}
+
 async function quickToggleCoveredByOther(id) {
   const debt = debts.find(d => d.id === id);
   if (!debt) return;
@@ -3729,6 +3772,9 @@ function renderV2DebtCard(d, today) {
       </div>
 
       <div style="display:flex; gap:0.4rem; margin-top:0.6rem; justify-content:flex-end; flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="markDebtAsUnpaid('${d.id}')" style="padding:0.3rem 0.6rem; font-size:0.75rem; background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.3);" title="Marcar cuota de este mes como NO PAGADA / PENDIENTE">
+          <i class="fa-solid fa-calendar-minus"></i> Marcar No Pagada
+        </button>
         <button class="btn btn-secondary btn-sm" onclick="quickToggleCoveredByOther('${d.id}')" style="padding:0.3rem 0.6rem; font-size:0.75rem; background:${isCovered ? 'rgba(96,165,250,0.25)' : 'rgba(96,165,250,0.1)'}; color:#60a5fa; border:1px solid rgba(96,165,250,0.3);" title="Marcar si esta cuota la paga un integrante de la familia o tercero">
           <i class="fa-solid fa-users"></i> ${isCovered ? 'Cubierto: ' + escapeHTML(d.cubierto_por) : '¿Cubierto por Tercero/Familiar?'}
         </button>
