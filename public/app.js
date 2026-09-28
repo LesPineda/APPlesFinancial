@@ -3362,18 +3362,24 @@ function renderV2HeroKPIs() {
     }
   });
 
-  // 2. Active debts total and monthly cuotas budget
+  // 2. Active debts total, executed paid cuotas, and pending cuotas
   const activeDebts = debts.filter(d => Number(d.saldo_total) > 0);
   let totalActiveDebt = 0;
-  let totalCuotasFijasMes = 0;
+  let totalCuotasFijasPresupuesto = 0;
+  let cuotasFijasPagadasMes = 0;
   let pendingCuotasAmount = 0;
   let pendingCuotasCount = 0;
 
   activeDebts.forEach(d => {
     totalActiveDebt += Number(d.saldo_total);
-    totalCuotasFijasMes += Number(d.pago_minimo);
+    totalCuotasFijasPresupuesto += Number(d.pago_minimo);
     const info = getDebtStatusInfo(d);
-    if (info.isRequired && info.status !== 'COVERED_BY_THIRD_PARTY' && info.status !== 'PAID_THIS_MONTH' && info.status !== 'PAID_BALANCE') {
+    
+    if (info.status === 'PAID_THIS_MONTH' || info.status === 'PAID_BALANCE') {
+      if (!d.cubierto_por || d.cubierto_por.trim() === '') {
+        cuotasFijasPagadasMes += Number(d.pago_minimo);
+      }
+    } else if (info.isRequired && info.status !== 'COVERED_BY_THIRD_PARTY') {
       pendingCuotasAmount += info.requiredAmount;
       pendingCuotasCount++;
     }
@@ -3418,7 +3424,7 @@ function renderV2HeroKPIs() {
     }
   });
 
-  const totalGastosMesCombinado = totalCuotasFijasMes + gastosVariosVariables;
+  const totalGastosMesCombinado = cuotasFijasPagadasMes + gastosVariosVariables;
 
   // 5. Calculate Financial Health Score (0 - 100%)
   const debtRatio = effectiveIncome > 0 ? (pendingCuotasAmount / effectiveIncome) * 100 : 50;
@@ -3454,7 +3460,7 @@ function renderV2HeroKPIs() {
       <span class="kpi-label"><i class="fa-solid fa-arrow-down-long text-danger"></i> Gastos Realizados Mes</span>
       <span class="kpi-val" style="color: #ef4444;">$${formatMoney(totalGastosMesCombinado)}</span>
       <span class="kpi-sub" style="font-size:0.7rem; line-height:1.35; margin-top:0.2rem; display:block;">
-        📌 <strong>Fijos (Cuotas):</strong> $${formatMoney(totalCuotasFijasMes)}<br>
+        📌 <strong>Fijos Pagados:</strong> $${formatMoney(cuotasFijasPagadasMes)}<br>
         🛒 <strong>Variables (Varios):</strong> $${formatMoney(gastosVariosVariables)}
       </span>
     </div>
