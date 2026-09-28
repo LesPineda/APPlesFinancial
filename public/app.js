@@ -3361,17 +3361,19 @@ function renderV2HeroKPIs() {
     }
   });
 
-  // 2. Active debts total
+  // 2. Active debts total and monthly cuotas budget
   const activeDebts = debts.filter(d => Number(d.saldo_total) > 0);
   let totalActiveDebt = 0;
-  let totalMonthlyCuotas = 0;
+  let totalCuotasFijasMes = 0;
+  let pendingCuotasAmount = 0;
   let pendingCuotasCount = 0;
 
   activeDebts.forEach(d => {
     totalActiveDebt += Number(d.saldo_total);
+    totalCuotasFijasMes += Number(d.pago_minimo);
     const info = getDebtStatusInfo(d);
     if (info.isRequired && info.status !== 'COVERED_BY_THIRD_PARTY' && info.status !== 'PAID_THIS_MONTH' && info.status !== 'PAID_BALANCE') {
-      totalMonthlyCuotas += info.requiredAmount;
+      pendingCuotasAmount += info.requiredAmount;
       pendingCuotasCount++;
     }
   });
@@ -3391,7 +3393,7 @@ function renderV2HeroKPIs() {
   }).reduce((sum, t) => sum + Number(t.monto), 0);
 
   // 5. Calculate Financial Health Score (0 - 100%)
-  const debtRatio = effectiveIncome > 0 ? (totalMonthlyCuotas / effectiveIncome) * 100 : 50;
+  const debtRatio = effectiveIncome > 0 ? (pendingCuotasAmount / effectiveIncome) * 100 : 50;
   let healthScore = 100 - Math.min(60, debtRatio);
   if (availableLiquid < 0) healthScore -= 20;
   if (activeDebts.some(d => checkIsOverdue(d))) healthScore -= 15;
@@ -3427,9 +3429,9 @@ function renderV2HeroKPIs() {
     </div>
 
     <div class="v2-kpi-card">
-      <span class="kpi-label"><i class="fa-solid fa-file-invoice-dollar text-warning"></i> Cuotas Pendientes Mes</span>
-      <span class="kpi-val" style="color: #fbbf24;">$${formatMoney(totalMonthlyCuotas)}</span>
-      <span class="kpi-sub">${pendingCuotasCount} cuota${pendingCuotasCount !== 1 ? 's' : ''} a tu cargo este mes</span>
+      <span class="kpi-label"><i class="fa-solid fa-file-invoice-dollar text-warning"></i> Cuotas Mensuales Totales</span>
+      <span class="kpi-val" style="color: #fbbf24;">$${formatMoney(totalCuotasFijasMes)}</span>
+      <span class="kpi-sub">$${formatMoney(pendingCuotasAmount)} pendientes este mes (${pendingCuotasCount} cuota${pendingCuotasCount !== 1 ? 's' : ''})</span>
     </div>
 
     <div class="v2-kpi-card">
