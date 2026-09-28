@@ -3628,34 +3628,66 @@ async function markDebtAsUnpaid(id) {
   const debt = debts.find(d => d.id === id);
   if (!debt) return;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const currentLimit = parseLocalDate(debt.fecha_limite_pago);
-  currentLimit.setHours(0, 0, 0, 0);
-
-  let newLimit = new Date(currentLimit);
-
-  if (currentLimit >= today) {
-    newLimit = new Date(today);
-    newLimit.setDate(newLimit.getDate() - 1);
-  } else {
-    newLimit.setDate(newLimit.getDate() - 32);
-  }
-
   const accName = debt.cuenta ? debt.cuenta.nombre : 'Deuda';
-  if (!confirm(`¿Deseas marcar la cuota de este mes de "${accName}" como NO PAGADA / PENDIENTE?\n\nEsto cambiará su estado a pendiente/vencida para que aparezca en tus obligaciones por pagar.`)) {
+  if (!confirm(`¿Deseas marcar la cuota de este mes de "${accName}" como NO PAGADA / PENDIENTE?\n\nEsto eliminará el pago registrado de este mes y volverá a colocar esta cuota como pendiente.`)) {
     return;
   }
 
   try {
+    // 1. Search for recent payment transactions in the last 35 days matching this debt
+    const thirtyFiveDaysAgo = new Date();
+    thirtyFiveDaysAgo.setDate(thirtyFiveDaysAgo.getDate() - 35);
+    const debtAccName = debt.cuenta ? debt.cuenta.nombre.toLowerCase() : '';
+    const debtAccId = debt.cuenta_id;
+
+    const matchingTxs = transactions.filter(t => {
+      if (t.tipo !== 'GASTO') return false;
+      const txDate = parseLocalDate(t.fecha_transaccion);
+      if (txDate < thirtyFiveDaysAgo) return false;
+
+      const desc = (t.descripcion || '').toLowerCase();
+      if (debtAccName) {
+        if (desc.includes(debtAccName)) return true;
+        const cleanAcc = debtAccName.replace('pago cuota', '').trim();
+        const cleanDesc = desc.replace('pago cuota', '').trim();
+        if (cleanAcc && cleanDesc.includes(cleanAcc)) return true;
+        if (cleanDesc && cleanAcc.includes(cleanDesc)) return true;
+        if (debtAccName.includes('cadena') && desc.includes('cadena')) return true;
+        if (debtAccName.includes('tigo') && desc.includes('tigo')) return true;
+        if (debtAccName.includes('addi') && desc.includes('addi')) return true;
+        if (debtAccName.includes('tuya') && desc.includes('tuya')) return true;
+        if (debtAccName.includes('internet') && desc.includes('internet')) return true;
+      }
+      if (debtAccId && t.cuenta_id === debtAccId) return true;
+      return false;
+    });
+
+    // Delete matching payment transactions if found
+    for (const tx of matchingTxs) {
+      await fetch(`${API_BASE}/transactions/${tx.id}`, { method: 'DELETE' });
+    }
+
+    // 2. Set fecha_limite_pago to today or past due date in current month, and clear cubierto_por
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDay = getDueDateDay(debt.fecha_limite_pago);
+    let newLimit = new Date(today.getFullYear(), today.getMonth(), Math.min(dueDay, 28));
+
+    if (newLimit > today) {
+      newLimit = new Date(today);
+      newLimit.setDate(newLimit.getDate() - 1);
+    }
+
     const res = await fetch(`${API_BASE}/debts/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        fecha_limite_pago: newLimit.toISOString()
+        fecha_limite_pago: newLimit.toISOString(),
+        cubierto_por: null
       })
     });
+
     const data = await res.json();
     if (data.status === 'success') {
       await loadData();
@@ -3663,6 +3695,7 @@ async function markDebtAsUnpaid(id) {
       alert('Error: ' + (data.message || 'No se pudo actualizar el estado de pago'));
     }
   } catch (err) {
+    console.error('Error in markDebtAsUnpaid:', err);
     alert('Error al conectar con la API.');
   }
 }
@@ -3672,19 +3705,31 @@ async function quickToggleCoveredByOther(id) {
   if (!debt) return;
 
   const currentCovered = debt.cubierto_por || '';
-  const name = prompt(
-    `Indica qué integrante de la familia o tercero cubre esta cuota del mes (ej: Kevin, Mamá, Pareja, etc.). Deja en blanco si la pagas tú directamente:`,
-    currentCovered
-  );
+  const accName = debt.cuenta ? debt.cuenta.nombre : 'Deuda';
 
-  if (name === null) return; // Cancelled
+  let newCoveredName = null;
+
+  if (currentCovered) {
+    const removeCoverage = confirm(`Actualmente "${accName}" está marcada como cubierta por: ${currentCovered}.\n\n¿Deseas QUITAR la cobertura por tercero para volver a responder tú por esta cuota?`);
+    if (removeCoverage) {
+      newCoveredName = null;
+    } else {
+      const name = prompt(`Ingresa el nombre del tercero/familiar que cubre "${accName}":`, currentCovered);
+      if (name === null) return;
+      newCoveredName = name.trim() !== '' ? name.trim() : null;
+    }
+  } else {
+    const name = prompt(`Indica qué integrante de la familia o tercero cubre la cuota de "${accName}" (ej: Kevin, Mamá, Pareja):`, 'Kevin');
+    if (name === null) return;
+    newCoveredName = name.trim() !== '' ? name.trim() : null;
+  }
 
   try {
     const res = await fetch(`${API_BASE}/debts/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        cubierto_por: name.trim() !== '' ? name.trim() : null
+        cubierto_por: newCoveredName
       })
     });
     const data = await res.json();
@@ -3694,6 +3739,7 @@ async function quickToggleCoveredByOther(id) {
       alert('Error: ' + (data.message || 'No se pudo actualizar la cobertura'));
     }
   } catch (err) {
+    console.error('Error in quickToggleCoveredByOther:', err);
     alert('Error al conectar con la API.');
   }
 }
