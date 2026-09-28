@@ -3382,7 +3382,7 @@ function renderV2HeroKPIs() {
   const incomeData = getV2IncomeData();
   const effectiveIncome = incomeData.totalMonthlyIncome;
 
-  // 4. Total expenses registered in current month with breakdown (Fijos vs Varios)
+  // 4. Variables/Non-fixed expenses registered in current month
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
@@ -3390,8 +3390,6 @@ function renderV2HeroKPIs() {
   const debtAccountIds = new Set(debts.map(d => d.cuenta_id).filter(Boolean));
   const debtAccountNamesClean = debts.map(d => d.cuenta ? d.cuenta.nombre.toLowerCase().trim() : '').filter(Boolean);
 
-  let totalExpensesThisMonth = 0;
-  let gastosFijosDeudas = 0;
   let gastosVariosVariables = 0;
 
   transactions.forEach(t => {
@@ -3399,8 +3397,6 @@ function renderV2HeroKPIs() {
     const txDate = parseLocalDate(t.fecha_transaccion);
     if (txDate.getFullYear() === currentYear && txDate.getMonth() === currentMonth) {
       const monto = Number(t.monto);
-      totalExpensesThisMonth += monto;
-
       const desc = (t.descripcion || '').toLowerCase().trim();
       const accName = (t.cuenta ? t.cuenta.nombre : '').toLowerCase().trim();
 
@@ -3415,13 +3411,13 @@ function renderV2HeroKPIs() {
       });
       const isExplicitDebtKeyword = desc.includes('pago cuota') || desc.includes('arriendo') || desc.includes('plan tigo');
 
-      if (isDebtAccount || isDebtName || isExplicitDebtKeyword) {
-        gastosFijosDeudas += monto;
-      } else {
+      if (!isDebtAccount && !isDebtName && !isExplicitDebtKeyword) {
         gastosVariosVariables += monto;
       }
     }
   });
+
+  const totalGastosMesCombinado = totalCuotasFijasMes + gastosVariosVariables;
 
   // 5. Calculate Financial Health Score (0 - 100%)
   const debtRatio = effectiveIncome > 0 ? (pendingCuotasAmount / effectiveIncome) * 100 : 50;
@@ -3455,10 +3451,10 @@ function renderV2HeroKPIs() {
 
     <div class="v2-kpi-card">
       <span class="kpi-label"><i class="fa-solid fa-arrow-down-long text-danger"></i> Gastos Realizados Mes</span>
-      <span class="kpi-val" style="color: #ef4444;">$${formatMoney(totalExpensesThisMonth)}</span>
+      <span class="kpi-val" style="color: #ef4444;">$${formatMoney(totalGastosMesCombinado)}</span>
       <span class="kpi-sub" style="font-size:0.7rem; line-height:1.35; margin-top:0.2rem; display:block;">
-        📌 <strong>Fijos / Cuotas:</strong> $${formatMoney(gastosFijosDeudas)}<br>
-        🛒 <strong>Varios / Libres:</strong> $${formatMoney(gastosVariosVariables)}
+        📌 <strong>Fijos (Cuotas):</strong> $${formatMoney(totalCuotasFijasMes)}<br>
+        🛒 <strong>Variables (Varios):</strong> $${formatMoney(gastosVariosVariables)}
       </span>
     </div>
 
