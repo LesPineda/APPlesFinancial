@@ -3463,9 +3463,9 @@ function renderV2HeroKPIs() {
     </div>
 
     <div class="v2-kpi-card">
-      <span class="kpi-label"><i class="fa-solid fa-file-invoice-dollar text-warning"></i> Cuotas Mensuales Totales</span>
-      <span class="kpi-val" style="color: #fbbf24;">$${formatMoney(totalCuotasFijasMes)}</span>
-      <span class="kpi-sub">$${formatMoney(pendingCuotasAmount)} pendientes este mes (${pendingCuotasCount} cuota${pendingCuotasCount !== 1 ? 's' : ''})</span>
+      <span class="kpi-label"><i class="fa-solid fa-file-invoice-dollar text-warning"></i> Cuotas Pendientes Mes</span>
+      <span class="kpi-val" style="color: #fbbf24;">$${formatMoney(pendingCuotasAmount)}</span>
+      <span class="kpi-sub">${pendingCuotasCount} cuota${pendingCuotasCount !== 1 ? 's' : ''} a tu cargo este mes</span>
     </div>
 
     <div class="v2-kpi-card">
