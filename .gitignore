@@ -10,8 +10,8 @@ dist/
 
 # Prisma-specific
 /prisma/migrations
-/prisma/*.db
 /prisma/*.db-journal
+!/prisma/dev.db
 
 # Logs
 logs

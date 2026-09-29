@@ -1,14 +1,19 @@
 import { PrismaClient } from '@prisma/client';
+import path from 'path';
 
-let dbUrl = process.env.DATABASE_URL || '';
-if (dbUrl && !dbUrl.includes('pgbouncer=true')) {
-  dbUrl += dbUrl.includes('?') ? '&pgbouncer=true' : '?pgbouncer=true';
+function getDatabaseUrl(): string {
+  const envUrl = process.env.DATABASE_URL;
+  if (envUrl && envUrl.startsWith('file:')) {
+    return envUrl;
+  }
+  const dbPath = path.join(process.cwd(), 'prisma', 'dev.db').replace(/\\/g, '/');
+  return `file:${dbPath}`;
 }
 
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: dbUrl
+      url: getDatabaseUrl()
     }
   }
 });
