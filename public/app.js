@@ -3520,14 +3520,23 @@ function renderV2TabCashflow() {
         <div class="card-header">
           <div>
             <span class="badge-fortnight-first" style="font-size:0.75rem;"><i class="fa-solid fa-calendar-days"></i> QUINCENA 1 (Fin de Mes / Días 1 al 14)</span>
-            <h3 style="margin-top:0.3rem;"><i class="fa-solid fa-money-bill-wave text-primary"></i> Cobro Q1: ${escapeHTML(incomeData.q1Name)} ($${formatMoney(incomeData.q1Income)})</h3>
+            <h3 style="margin-top:0.3rem;"><i class="fa-solid fa-money-bill-wave text-primary"></i> Cobro Q1: ${escapeHTML(incomeData.q1Name)}</h3>
           </div>
-          <div style="text-align:right;">
-            <span style="font-size:0.7rem; color:var(--text-muted); display:block;">Cuotas Pendientes Q1:</span>
-            <strong style="font-size:1.15rem; color:#fbbf24;">$${formatMoney(q1CuotasTotal)}</strong>
-            <span style="font-size:0.75rem; color:${q1Diff >= 0 ? '#10b981' : '#ef4444'}; font-weight:800; display:block; margin-top:0.2rem;">
-              ${q1Diff >= 0 ? '+$' + formatMoney(q1Diff) + ' libre Q1' : '-$' + formatMoney(Math.abs(q1Diff)) + ' faltante Q1'}
+          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0.15rem; min-width:190px;">
+            <span style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; width:100%;">
+              <span><i class="fa-solid fa-wallet text-success"></i> Nómina Q1 (100%):</span>
+              <strong style="color:#34d399; font-weight:700; margin-left:0.5rem;">$${formatMoney(incomeData.q1Income)}</strong>
             </span>
+            <span style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; width:100%;">
+              <span><i class="fa-solid fa-file-invoice-dollar text-warning"></i> Cuotas/Gastos Q1:</span>
+              <strong style="color:#fbbf24; font-weight:700; margin-left:0.5rem;">-$${formatMoney(q1CuotasTotal)}</strong>
+            </span>
+            <div style="margin-top:0.2rem; padding-top:0.2rem; border-top:1px dashed rgba(255,255,255,0.15); width:100%; text-align:right;">
+              <span style="font-size:0.68rem; color:var(--text-muted); display:block;">Disponible Restante Q1:</span>
+              <strong style="font-size:1.15rem; color:${q1Diff >= 0 ? '#10b981' : '#ef4444'}; font-weight:800; display:block;">
+                ${q1Diff >= 0 ? '+$' + formatMoney(q1Diff) + ' libre' : '-$' + formatMoney(Math.abs(q1Diff)) + ' faltante'}
+              </strong>
+            </div>
           </div>
         </div>
 
@@ -3578,14 +3587,23 @@ function renderV2TabCashflow() {
         <div class="card-header">
           <div>
             <span class="badge-fortnight-second" style="font-size:0.75rem;"><i class="fa-solid fa-calendar-days"></i> QUINCENA 2 (Mitad de Mes / Días 15 al 31)</span>
-            <h3 style="margin-top:0.3rem;"><i class="fa-solid fa-money-bill-wave text-success"></i> Cobro Q2: ${escapeHTML(incomeData.q2Name)} ($${formatMoney(incomeData.q2Income)})</h3>
+            <h3 style="margin-top:0.3rem;"><i class="fa-solid fa-money-bill-wave text-success"></i> Cobro Q2: ${escapeHTML(incomeData.q2Name)}</h3>
           </div>
-          <div style="text-align:right;">
-            <span style="font-size:0.7rem; color:var(--text-muted); display:block;">Cuotas Pendientes Q2:</span>
-            <strong style="font-size:1.15rem; color:#fbbf24;">$${formatMoney(q2CuotasTotal)}</strong>
-            <span style="font-size:0.75rem; color:${q2Diff >= 0 ? '#10b981' : '#ef4444'}; font-weight:800; display:block; margin-top:0.2rem;">
-              ${q2Diff >= 0 ? '+$' + formatMoney(q2Diff) + ' libre Q2' : '-$' + formatMoney(Math.abs(q2Diff)) + ' faltante Q2'}
+          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0.15rem; min-width:190px;">
+            <span style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; width:100%;">
+              <span><i class="fa-solid fa-wallet text-success"></i> Nómina Q2 (100%):</span>
+              <strong style="color:#34d399; font-weight:700; margin-left:0.5rem;">$${formatMoney(incomeData.q2Income)}</strong>
             </span>
+            <span style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; width:100%;">
+              <span><i class="fa-solid fa-file-invoice-dollar text-warning"></i> Cuotas/Gastos Q2:</span>
+              <strong style="color:#fbbf24; font-weight:700; margin-left:0.5rem;">-$${formatMoney(q2CuotasTotal)}</strong>
+            </span>
+            <div style="margin-top:0.2rem; padding-top:0.2rem; border-top:1px dashed rgba(255,255,255,0.15); width:100%; text-align:right;">
+              <span style="font-size:0.68rem; color:var(--text-muted); display:block;">Disponible Restante Q2:</span>
+              <strong style="font-size:1.15rem; color:${q2Diff >= 0 ? '#10b981' : '#ef4444'}; font-weight:800; display:block;">
+                ${q2Diff >= 0 ? '+$' + formatMoney(q2Diff) + ' libre' : '-$' + formatMoney(Math.abs(q2Diff)) + ' faltante'}
+              </strong>
+            </div>
           </div>
         </div>
 
