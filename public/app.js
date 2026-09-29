@@ -3497,11 +3497,15 @@ function renderV2TabCashflow() {
     return day >= 15 && day <= 31;
   });
 
-  const q1CuotasTotal = q1Debts.reduce((sum, d) => sum + getDebtStatusInfo(d).requiredAmount, 0);
-  const q2CuotasTotal = q2Debts.reduce((sum, d) => sum + getDebtStatusInfo(d).requiredAmount, 0);
+  // Calculate full Quincena commitments (cuotas a tu cargo no cubiertas por terceros)
+  const q1CuotasTotal = q1Debts.reduce((sum, d) => sum + (d.cubierto_por ? 0 : Number(d.pago_minimo)), 0);
+  const q2CuotasTotal = q2Debts.reduce((sum, d) => sum + (d.cubierto_por ? 0 : Number(d.pago_minimo)), 0);
 
   const q1Diff = incomeData.q1Income - q1CuotasTotal;
   const q2Diff = incomeData.q2Income - q2CuotasTotal;
+
+  // Real Liquid Balance in Bank/Cash Accounts
+  const totalLiquid = accounts.filter(a => ['DEBITO', 'EFECTIVO'].includes(a.tipo)).reduce((s, a) => s + Number(a.saldo_actual), 0);
 
   // Category breakdown calculation
   const catVivienda = activeDebts.filter(d => ['arriendo pa', 'Apartamento'].includes(d.cuenta?.nombre)).reduce((s, d) => s + (!d.cubierto_por ? Number(d.pago_minimo) : 0), 0);
@@ -3522,7 +3526,7 @@ function renderV2TabCashflow() {
             <span class="badge-fortnight-first" style="font-size:0.75rem;"><i class="fa-solid fa-calendar-days"></i> QUINCENA 1 (Fin de Mes / Días 1 al 14)</span>
             <h3 style="margin-top:0.3rem;"><i class="fa-solid fa-money-bill-wave text-primary"></i> Cobro Q1: ${escapeHTML(incomeData.q1Name)}</h3>
           </div>
-          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0.15rem; min-width:190px;">
+          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0.15rem; min-width:210px;">
             <span style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; width:100%;">
               <span><i class="fa-solid fa-wallet text-success"></i> Nómina Q1 (100%):</span>
               <strong style="color:#34d399; font-weight:700; margin-left:0.5rem;">$${formatMoney(incomeData.q1Income)}</strong>
@@ -3536,6 +3540,7 @@ function renderV2TabCashflow() {
               <strong style="font-size:1.15rem; color:${q1Diff >= 0 ? '#10b981' : '#ef4444'}; font-weight:800; display:block;">
                 ${q1Diff >= 0 ? '+$' + formatMoney(q1Diff) + ' libre' : '-$' + formatMoney(Math.abs(q1Diff)) + ' faltante'}
               </strong>
+              <span style="font-size:0.65rem; color:#94a3b8; display:block; margin-top:0.1rem;">(Saldo Real en Bancos: $${formatMoney(totalLiquid)})</span>
             </div>
           </div>
         </div>
@@ -3589,7 +3594,7 @@ function renderV2TabCashflow() {
             <span class="badge-fortnight-second" style="font-size:0.75rem;"><i class="fa-solid fa-calendar-days"></i> QUINCENA 2 (Mitad de Mes / Días 15 al 31)</span>
             <h3 style="margin-top:0.3rem;"><i class="fa-solid fa-money-bill-wave text-success"></i> Cobro Q2: ${escapeHTML(incomeData.q2Name)}</h3>
           </div>
-          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0.15rem; min-width:190px;">
+          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0.15rem; min-width:210px;">
             <span style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; width:100%;">
               <span><i class="fa-solid fa-wallet text-success"></i> Nómina Q2 (100%):</span>
               <strong style="color:#34d399; font-weight:700; margin-left:0.5rem;">$${formatMoney(incomeData.q2Income)}</strong>
@@ -3603,6 +3608,7 @@ function renderV2TabCashflow() {
               <strong style="font-size:1.15rem; color:${q2Diff >= 0 ? '#10b981' : '#ef4444'}; font-weight:800; display:block;">
                 ${q2Diff >= 0 ? '+$' + formatMoney(q2Diff) + ' libre' : '-$' + formatMoney(Math.abs(q2Diff)) + ' faltante'}
               </strong>
+              <span style="font-size:0.65rem; color:#94a3b8; display:block; margin-top:0.1rem;">(Saldo Real en Bancos: $${formatMoney(totalLiquid)})</span>
             </div>
           </div>
         </div>
