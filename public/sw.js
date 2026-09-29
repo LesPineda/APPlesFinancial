@@ -1,5 +1,5 @@
 // Service Worker para LesApp PWA (Android & Web)
-const CACHE_NAME = 'lesapp-pwa-v58';
+const CACHE_NAME = 'lesapp-pwa-v59';
 const ASSETS = [
   '/',
   '/index.html',

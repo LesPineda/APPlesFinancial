@@ -3134,7 +3134,7 @@ function getDebtStatusInfo(debt) {
   if (isPaidBalance) {
     return {
       status: 'PAID_BALANCE',
-      badgeLabel: `PAGADA ($${formatMoney(debt.pago_minimo)})`,
+      badgeLabel: 'PAGADA',
       badgeClass: 'badge-ok',
       badgeColor: '#10b981',
       isRequired: false,
@@ -3147,7 +3147,7 @@ function getDebtStatusInfo(debt) {
   if (isCoveredByOther) {
     return {
       status: 'COVERED_BY_THIRD_PARTY',
-      badgeLabel: `CUBIERTO POR: ${debt.cubierto_por.toUpperCase()} ($${formatMoney(debt.pago_minimo)})`,
+      badgeLabel: `CUBIERTO POR: ${debt.cubierto_por.toUpperCase()}`,
       badgeClass: 'badge-covered-other',
       badgeColor: '#60a5fa',
       isRequired: false,
@@ -3200,7 +3200,7 @@ function getDebtStatusInfo(debt) {
   if (recentPaymentTx) {
     return {
       status: 'PAID_THIS_MONTH',
-      badgeLabel: `✓ PAGADA ESTE MES ($${formatMoney(debt.pago_minimo)})`,
+      badgeLabel: 'PAGADA ESTE MES',
       badgeClass: 'badge-ok',
       badgeColor: '#10b981',
       isRequired: false,
@@ -3213,7 +3213,7 @@ function getDebtStatusInfo(debt) {
   if (limiteDate > endOfCurrentMonth) {
     return {
       status: 'PAID_THIS_MONTH',
-      badgeLabel: `✓ AL DÍA ($${formatMoney(debt.pago_minimo)}) • ${formatDateOnly(debt.fecha_limite_pago)}`,
+      badgeLabel: `AL DÍA (${formatDateOnly(debt.fecha_limite_pago)})`,
       badgeClass: 'badge-ok',
       badgeColor: '#10b981',
       isRequired: false,
@@ -3227,7 +3227,7 @@ function getDebtStatusInfo(debt) {
     const montoMora = cuotasVencidas * Number(debt.pago_minimo);
     return {
       status: 'OVERDUE',
-      badgeLabel: `VENCIDA (${cuotasVencidas} cuota${cuotasVencidas > 1 ? 's' : ''} - $${formatMoney(debt.pago_minimo)}/mes)`,
+      badgeLabel: `VENCIDA (${cuotasVencidas} cuota${cuotasVencidas > 1 ? 's' : ''})`,
       badgeClass: 'badge-overdue',
       badgeColor: '#ef4444',
       isRequired: true,
@@ -3239,7 +3239,7 @@ function getDebtStatusInfo(debt) {
 
   return {
     status: 'UP_TO_DATE',
-    badgeLabel: `AL DÍA ($${formatMoney(debt.pago_minimo)})`,
+    badgeLabel: 'AL DÍA',
     badgeClass: 'badge-ok',
     badgeColor: '#34d399',
     isRequired: true,
@@ -3576,7 +3576,6 @@ function renderV2TabCashflow() {
                   <span style="font-size:0.7rem; color:var(--text-muted);">
                     Límite: Día ${getDueDateDay(d.fecha_limite_pago)} • Cuota: $${formatMoney(minPago)}
                     ${info.status === 'COVERED_BY_THIRD_PARTY' ? ' • Cubierto por: ' + escapeHTML(d.cubierto_por) : ''}
-                    ${info.status === 'PAID_THIS_MONTH' ? ' • ' + info.badgeLabel : ''}
                   </span>
                 </div>
                 <strong style="color:${amountColor}; font-size:0.85rem;">
@@ -3642,7 +3641,6 @@ function renderV2TabCashflow() {
                   <span style="font-size:0.7rem; color:var(--text-muted);">
                     Límite: Día ${getDueDateDay(d.fecha_limite_pago)} • Cuota: $${formatMoney(minPago)}
                     ${info.status === 'COVERED_BY_THIRD_PARTY' ? ' • Cubierto por: ' + escapeHTML(d.cubierto_por) : ''}
-                    ${info.status === 'PAID_THIS_MONTH' ? ' • ' + info.badgeLabel : ''}
                   </span>
                 </div>
                 <strong style="color:${amountColor}; font-size:0.85rem;">
