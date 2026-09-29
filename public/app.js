@@ -3134,7 +3134,7 @@ function getDebtStatusInfo(debt) {
   if (isPaidBalance) {
     return {
       status: 'PAID_BALANCE',
-      badgeLabel: 'PAGADA / $0',
+      badgeLabel: `PAGADA ($${formatMoney(debt.pago_minimo)})`,
       badgeClass: 'badge-ok',
       badgeColor: '#10b981',
       isRequired: false,
@@ -3147,7 +3147,7 @@ function getDebtStatusInfo(debt) {
   if (isCoveredByOther) {
     return {
       status: 'COVERED_BY_THIRD_PARTY',
-      badgeLabel: `CUBIERTO POR: ${debt.cubierto_por.toUpperCase()}`,
+      badgeLabel: `CUBIERTO POR: ${debt.cubierto_por.toUpperCase()} ($${formatMoney(debt.pago_minimo)})`,
       badgeClass: 'badge-covered-other',
       badgeColor: '#60a5fa',
       isRequired: false,
@@ -3200,7 +3200,7 @@ function getDebtStatusInfo(debt) {
   if (recentPaymentTx) {
     return {
       status: 'PAID_THIS_MONTH',
-      badgeLabel: `✓ PAGADA ESTE MES ($${formatMoney(recentPaymentTx.monto)})`,
+      badgeLabel: `✓ PAGADA ESTE MES ($${formatMoney(debt.pago_minimo)})`,
       badgeClass: 'badge-ok',
       badgeColor: '#10b981',
       isRequired: false,
@@ -3213,7 +3213,7 @@ function getDebtStatusInfo(debt) {
   if (limiteDate > endOfCurrentMonth) {
     return {
       status: 'PAID_THIS_MONTH',
-      badgeLabel: `✓ AL DÍA (${formatDateOnly(debt.fecha_limite_pago)})`,
+      badgeLabel: `✓ AL DÍA ($${formatMoney(debt.pago_minimo)}) • ${formatDateOnly(debt.fecha_limite_pago)}`,
       badgeClass: 'badge-ok',
       badgeColor: '#10b981',
       isRequired: false,
@@ -3227,7 +3227,7 @@ function getDebtStatusInfo(debt) {
     const montoMora = cuotasVencidas * Number(debt.pago_minimo);
     return {
       status: 'OVERDUE',
-      badgeLabel: `VENCIDA (${cuotasVencidas} cuota${cuotasVencidas > 1 ? 's' : ''})`,
+      badgeLabel: `VENCIDA (${cuotasVencidas} cuota${cuotasVencidas > 1 ? 's' : ''} - $${formatMoney(debt.pago_minimo)}/mes)`,
       badgeClass: 'badge-overdue',
       badgeColor: '#ef4444',
       isRequired: true,
@@ -3239,7 +3239,7 @@ function getDebtStatusInfo(debt) {
 
   return {
     status: 'UP_TO_DATE',
-    badgeLabel: 'AL DÍA',
+    badgeLabel: `AL DÍA ($${formatMoney(debt.pago_minimo)})`,
     badgeClass: 'badge-ok',
     badgeColor: '#34d399',
     isRequired: true,
@@ -3552,17 +3552,18 @@ function renderV2TabCashflow() {
             const accName = d.cuenta ? d.cuenta.nombre : 'Deuda';
             const isUnificado = accName.includes('Unificado');
             const info = getDebtStatusInfo(d);
-            let amountText = `$${formatMoney(d.pago_minimo)}`;
+            const minPago = Number(d.pago_minimo);
+            let amountText = `$${formatMoney(minPago)}`;
             let amountColor = isUnificado ? '#f59e0b' : '#ef4444';
             
             if (info.status === 'COVERED_BY_THIRD_PARTY') {
-              amountText = 'CUBIERTO ($0)';
+              amountText = `CUBIERTO ($${formatMoney(minPago)})`;
               amountColor = '#60a5fa';
             } else if (info.status === 'PAID_THIS_MONTH') {
-              amountText = `✓ PAGADA ESTE MES ($0 PENDIENTE)`;
+              amountText = `✓ PAGADA ESTE MES ($${formatMoney(minPago)})`;
               amountColor = '#10b981';
             } else if (info.status === 'PAID_BALANCE') {
-              amountText = 'PAGADA ($0)';
+              amountText = `PAGADA ($${formatMoney(minPago)})`;
               amountColor = '#10b981';
             }
 
@@ -3573,9 +3574,9 @@ function renderV2TabCashflow() {
                     ${escapeHTML(accName)} ${isUnificado ? '⭐ (UNIFICADO)' : ''}
                   </strong>
                   <span style="font-size:0.7rem; color:var(--text-muted);">
-                    Límite: Día ${getDueDateDay(d.fecha_limite_pago)} 
-                    ${info.status === 'COVERED_BY_THIRD_PARTY' ? '• Cubierto por: ' + escapeHTML(d.cubierto_por) : ''}
-                    ${info.status === 'PAID_THIS_MONTH' ? '• ' + info.badgeLabel : ''}
+                    Límite: Día ${getDueDateDay(d.fecha_limite_pago)} • Cuota: $${formatMoney(minPago)}
+                    ${info.status === 'COVERED_BY_THIRD_PARTY' ? ' • Cubierto por: ' + escapeHTML(d.cubierto_por) : ''}
+                    ${info.status === 'PAID_THIS_MONTH' ? ' • ' + info.badgeLabel : ''}
                   </span>
                 </div>
                 <strong style="color:${amountColor}; font-size:0.85rem;">
@@ -3619,17 +3620,18 @@ function renderV2TabCashflow() {
           ${q2Debts.map(d => {
             const accName = d.cuenta ? d.cuenta.nombre : 'Deuda';
             const info = getDebtStatusInfo(d);
-            let amountText = `$${formatMoney(d.pago_minimo)}`;
+            const minPago = Number(d.pago_minimo);
+            let amountText = `$${formatMoney(minPago)}`;
             let amountColor = '#ef4444';
             
             if (info.status === 'COVERED_BY_THIRD_PARTY') {
-              amountText = 'CUBIERTO ($0)';
+              amountText = `CUBIERTO ($${formatMoney(minPago)})`;
               amountColor = '#60a5fa';
             } else if (info.status === 'PAID_THIS_MONTH') {
-              amountText = `✓ PAGADA ESTE MES ($0 PENDIENTE)`;
+              amountText = `✓ PAGADA ESTE MES ($${formatMoney(minPago)})`;
               amountColor = '#10b981';
             } else if (info.status === 'PAID_BALANCE') {
-              amountText = 'PAGADA ($0)';
+              amountText = `PAGADA ($${formatMoney(minPago)})`;
               amountColor = '#10b981';
             }
 
@@ -3638,9 +3640,9 @@ function renderV2TabCashflow() {
                 <div>
                   <strong style="font-size:0.85rem; color:#fff; display:block;">${escapeHTML(accName)}</strong>
                   <span style="font-size:0.7rem; color:var(--text-muted);">
-                    Límite: Día ${getDueDateDay(d.fecha_limite_pago)} 
-                    ${info.status === 'COVERED_BY_THIRD_PARTY' ? '• Cubierto por: ' + escapeHTML(d.cubierto_por) : ''}
-                    ${info.status === 'PAID_THIS_MONTH' ? '• ' + info.badgeLabel : ''}
+                    Límite: Día ${getDueDateDay(d.fecha_limite_pago)} • Cuota: $${formatMoney(minPago)}
+                    ${info.status === 'COVERED_BY_THIRD_PARTY' ? ' • Cubierto por: ' + escapeHTML(d.cubierto_por) : ''}
+                    ${info.status === 'PAID_THIS_MONTH' ? ' • ' + info.badgeLabel : ''}
                   </span>
                 </div>
                 <strong style="color:${amountColor}; font-size:0.85rem;">
