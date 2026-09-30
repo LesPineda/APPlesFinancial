@@ -3956,7 +3956,7 @@ function runV2DebtSimulation() {
     }
 
     const targetPaidTotal = targetDebtObj ? (debtPayments[targetDebtObj.id] || 0) : 0;
-    const otherDebtsPaid = Math.max(0, monthTotalPaid - targetPaidTotal);
+    const targetDebtRemaining = targetDebtObj ? Math.max(0, targetDebtObj.saldo) : 0;
     const remainingTotal = simDebts.reduce((s, d) => s + Math.max(0, d.saldo), 0);
 
     const projectedDate = new Date(now.getFullYear(), now.getMonth() + months, 1);
@@ -3969,7 +3969,7 @@ function runV2DebtSimulation() {
       targetMin,
       targetExtra,
       targetPaidTotal,
-      otherDebtsPaid,
+      targetDebtRemaining,
       totalPaid: monthTotalPaid,
       remaining: remainingTotal
     });
@@ -4004,9 +4004,9 @@ function runV2DebtSimulation() {
     <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); padding:0.85rem 1.1rem; border-radius:12px; margin-top:1.2rem; font-size:0.8rem; color:#93c5fd; display:flex; align-items:flex-start; gap:0.6rem;">
       <i class="fa-solid fa-lightbulb text-warning" style="font-size:1.1rem; margin-top:0.1rem;"></i>
       <div>
-        <strong>¿Cómo leer esta tabla de aceleración?</strong>
+        <strong>¿Cómo leer esta tabla de aceleración de deudas?</strong>
         <p style="margin:0.2rem 0 0; font-size:0.78rem; color:var(--text-muted);">
-          Para la <strong>Deuda Enfoque</strong> (ej. Addi) verás su cuota habitual más tu abono extra de $${formatMoney(extraAmount)}. La columna <strong>Presupuesto Total Mes</strong> incluye la suma de todas tus cuotas del mes juntas.
+          Para la <strong>Deuda Enfoque</strong> (ej. Addi) verás el pago realizado en el mes y en la columna <strong>"Saldo Restante de esta Deuda"</strong> verás exactamente cuánto falta para liquidarla hasta llegar a <strong>🎉 $0 (100% Pagada)</strong>.
         </p>
       </div>
     </div>
@@ -4020,9 +4020,9 @@ function runV2DebtSimulation() {
             <th style="padding:0.6rem;">Fecha</th>
             <th style="padding:0.6rem;">Deuda Enfoque</th>
             <th style="padding:0.6rem; text-align:right; color:#34d399;">Pago a esta Deuda</th>
-            <th style="padding:0.6rem; text-align:right;">Demás Cuotas del Mes</th>
+            <th style="padding:0.6rem; text-align:right; color:#60a5fa;">Saldo Restante de esta Deuda</th>
             <th style="padding:0.6rem; text-align:right; color:#fbbf24;">Presupuesto Total Mes</th>
-            <th style="padding:0.6rem; text-align:right;">Saldo Total Restante</th>
+            <th style="padding:0.6rem; text-align:right;">Saldo Deudas Global</th>
           </tr>
         </thead>
         <tbody>
@@ -4037,7 +4037,9 @@ function runV2DebtSimulation() {
                 $${formatMoney(m.targetPaidTotal)}
                 ${m.targetExtra > 0 ? `<br><span style="font-size:0.68rem; color:var(--text-muted); font-weight:normal;">(Cuota $${formatMoney(m.targetMin)} + Extra $${formatMoney(m.targetExtra)})</span>` : ''}
               </td>
-              <td style="padding:0.6rem; text-align:right; color:var(--text-muted);">$${formatMoney(m.otherDebtsPaid)}</td>
+              <td style="padding:0.6rem; text-align:right; font-weight:700; color:${m.targetDebtRemaining === 0 ? '#34d399' : '#60a5fa'};">
+                ${m.targetDebtRemaining === 0 ? '🎉 $0 (100% PAGADA)' : '$' + formatMoney(m.targetDebtRemaining)}
+              </td>
               <td style="padding:0.6rem; text-align:right; font-weight:700; color:#fbbf24;">$${formatMoney(m.totalPaid)}</td>
               <td style="padding:0.6rem; text-align:right; font-weight:700; color:${m.remaining === 0 ? '#34d399' : '#fff'};">
                 ${m.remaining === 0 ? '🎉 $0 (LIBRE)' : '$' + formatMoney(m.remaining)}
