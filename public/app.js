@@ -128,15 +128,22 @@ async function fetchDebts() {
   }
 }
 
-// 3. Rendering Functions
 function renderAccounts() {
-  const container = document.getElementById('accounts-list');
+  const containers = [
+    document.getElementById('accounts-list'),
+    document.getElementById('v2-accounts-container')
+  ].filter(Boolean);
+
+  if (containers.length === 0) return;
+
   if (accounts.length === 0) {
-    container.innerHTML = `<div class="loading-spinner">No tienes cuentas registradas</div>`;
+    containers.forEach(c => {
+      c.innerHTML = `<div class="loading-spinner">No tienes cuentas registradas</div>`;
+    });
     return;
   }
 
-  container.innerHTML = accounts.map(acc => `
+  const html = accounts.map(acc => `
     <div class="account-item">
       <div class="item-left">
         <div class="item-icon">
@@ -148,8 +155,11 @@ function renderAccounts() {
         </div>
       </div>
       <div class="item-right">
-        <div class="item-value">$${formatMoney(acc.saldo_actual)}</div>
+        <div class="item-value" style="${Number(acc.saldo_actual) < 0 ? 'color: #ef4444;' : 'color: #10b981;'}">$${formatMoney(acc.saldo_actual)}</div>
         <div class="item-actions">
+          <button class="btn-action-small edit-account-btn" data-id="${acc.id}" title="Editar saldo o datos de la cuenta" style="background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3);">
+            <i class="fa-solid fa-pen-to-square pointer-events-none"></i>
+          </button>
           <button class="btn-action-small delete-account-btn" data-id="${acc.id}" title="Eliminar cuenta">
             <i class="fa-solid fa-trash pointer-events-none"></i>
           </button>
@@ -157,6 +167,27 @@ function renderAccounts() {
       </div>
     </div>
   `).join('');
+
+  containers.forEach(c => {
+    c.innerHTML = html;
+  });
+}
+
+function openEditAccountModal(accountId) {
+  const acc = accounts.find(a => String(a.id) === String(accountId));
+  if (!acc) return;
+
+  const idInput = document.getElementById('edit-account-id');
+  const nombreInput = document.getElementById('edit-account-nombre');
+  const tipoInput = document.getElementById('edit-account-tipo');
+  const saldoInput = document.getElementById('edit-account-saldo');
+
+  if (idInput) idInput.value = acc.id;
+  if (nombreInput) nombreInput.value = acc.nombre;
+  if (tipoInput) tipoInput.value = acc.tipo;
+  if (saldoInput) saldoInput.value = acc.saldo_actual;
+
+  openModal('modal-edit-account');
 }
 
 function formatKm(km) {
@@ -2059,14 +2090,26 @@ function setupEventListeners() {
     }
   });
 
-  // Event delegation for delete and debt action buttons
-  document.getElementById('accounts-list').addEventListener('click', async (e) => {
-    const btn = e.target.closest('.delete-account-btn');
-    if (btn) {
-      const id = btn.dataset.id;
+  // Event delegation for delete and edit account buttons
+  const handleAccountClick = async (e) => {
+    const editBtn = e.target.closest('.edit-account-btn');
+    if (editBtn) {
+      const id = editBtn.dataset.id;
+      openEditAccountModal(id);
+      return;
+    }
+    const delBtn = e.target.closest('.delete-account-btn');
+    if (delBtn) {
+      const id = delBtn.dataset.id;
       await deleteAccount(id);
     }
-  });
+  };
+
+  const accList1 = document.getElementById('accounts-list');
+  if (accList1) accList1.addEventListener('click', handleAccountClick);
+
+  const accList2 = document.getElementById('v2-accounts-container');
+  if (accList2) accList2.addEventListener('click', handleAccountClick);
 
   document.getElementById('debts-list').addEventListener('click', async (e) => {
     const payBtn = e.target.closest('.pay-debt-btn');
@@ -2951,6 +2994,12 @@ function setupV2TabListeners() {
   const btnCancelEditDebt = document.getElementById('btn-cancel-edit-debt');
   if (btnCancelEditDebt) btnCancelEditDebt.onclick = () => closeModal('edit-debt-modal');
 
+  const btnCancelEditAccount = document.getElementById('btn-cancel-edit-account');
+  if (btnCancelEditAccount) btnCancelEditAccount.onclick = () => closeModal('modal-edit-account');
+
+  const btnCancelAddAccount = document.getElementById('btn-cancel-modal-add-account');
+  if (btnCancelAddAccount) btnCancelAddAccount.onclick = () => closeModal('modal-add-account');
+
   // Auto-fill amount & description when selecting a debt account in modal transaction form
   const modalTxCuenta = document.getElementById('modal-tx-cuenta');
   if (modalTxCuenta) {
@@ -3123,6 +3172,70 @@ function setupV2TabListeners() {
         }
       } catch (err) {
         alert('Error al actualizar la deuda.');
+      }
+    };
+  }
+
+  const formEditAccount = document.getElementById('form-edit-account');
+  if (formEditAccount) {
+    formEditAccount.onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('edit-account-id').value;
+      const nombre = document.getElementById('edit-account-nombre').value;
+      const tipo = document.getElementById('edit-account-tipo').value;
+      const saldo_actual = document.getElementById('edit-account-saldo').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/accounts/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre,
+            tipo,
+            saldo_actual: Number(saldo_actual)
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          closeModal('modal-edit-account');
+          await loadData();
+        } else {
+          alert(`Error: ${data.message || 'No se pudo actualizar el saldo de la cuenta'}`);
+        }
+      } catch (err) {
+        alert('Error de conexión al actualizar la cuenta.');
+      }
+    };
+  }
+
+  const formAddAccount = document.getElementById('form-modal-add-account');
+  if (formAddAccount) {
+    formAddAccount.onsubmit = async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById('modal-acc-nombre').value;
+      const tipo = document.getElementById('modal-acc-tipo').value;
+      const saldo_actual = document.getElementById('modal-acc-saldo').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/accounts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre,
+            tipo,
+            saldo_actual: Number(saldo_actual)
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          closeModal('modal-add-account');
+          formAddAccount.reset();
+          await loadData();
+        } else {
+          alert(`Error: ${data.message || 'No se pudo crear la cuenta'}`);
+        }
+      } catch (err) {
+        alert('Error de conexión al crear la cuenta.');
       }
     };
   }

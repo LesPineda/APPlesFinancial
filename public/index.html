@@ -432,6 +432,10 @@
                 <i class="fa-solid fa-list-check"></i>
                 <span>Historial de Movimientos</span>
               </button>
+              <button class="v2-tab" data-v2tab="v2-tab-cuentas">
+                <i class="fa-solid fa-wallet" style="color: #60a5fa;"></i>
+                <span>Cuentas & Saldos Bancarios</span>
+              </button>
               <button class="v2-tab" data-v2tab="v2-tab-sync">
                 <i class="fa-solid fa-rotate"></i>
                 <span>Sincronización & Registros</span>
@@ -478,6 +482,24 @@
           <!-- V2 TAB 5: MATRIZ DE SINCRONIZACIÓN -->
           <div id="v2-tab-sync" class="v2-subview hidden">
             <!-- Dynamically populated sync matrix & quick forms -->
+          </div>
+
+          <!-- V2 TAB 6: MIS CUENTAS Y SALDOS BANCARIOS -->
+          <div id="v2-tab-cuentas" class="v2-subview hidden">
+            <div class="glass-card" style="border-left: 4px solid #3b82f6;">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <h3><i class="fa-solid fa-wallet text-primary"></i> Mis Cuentas Bancarias & Saldos Actuales</h3>
+                <button class="btn btn-primary" onclick="openModal('modal-add-account')" style="padding:0.4rem 0.8rem; font-size:0.8rem; background: linear-gradient(135deg, #3b82f6, #2563eb); border:none;">
+                  <i class="fa-solid fa-plus"></i> + Nueva Cuenta
+                </button>
+              </div>
+              <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1rem;">
+                Consulta y actualiza directamente el saldo real disponible de tu Banco Bogotá, Daviplata, Nequi y demás cuentas.
+              </p>
+              <div id="v2-accounts-container" class="accounts-list">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
           </div>
 
         </div>
@@ -721,6 +743,75 @@
       </form>
     </div>
   </div>
+  <!-- Modal: Agregar Cuenta -->
+  <div id="modal-add-account" class="modal-overlay hidden">
+    <div class="glass-card modal-card" style="max-width: 440px; width: 90%;">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-wallet text-primary"></i> Nueva Cuenta Bancaria</h2>
+      </div>
+      <form id="form-modal-add-account" class="inline-form">
+        <div class="form-group">
+          <label for="modal-acc-nombre">Nombre de la Cuenta</label>
+          <input type="text" id="modal-acc-nombre" placeholder="Ej: Banco Bogotá, Daviplata, Nequi..." required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-acc-tipo">Tipo de Cuenta</label>
+            <select id="modal-acc-tipo" required>
+              <option value="DEBITO" selected>Débito (Banco)</option>
+              <option value="CREDITO">Crédito (Tarjeta / Préstamo)</option>
+              <option value="EFECTIVO">Efectivo</option>
+              <option value="SERVICIO">Servicio Fijo / Público</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modal-acc-saldo">Saldo Actual ($)</label>
+            <input type="number" id="modal-acc-saldo" placeholder="Ej: 2192818" step="0.01" required>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" id="btn-cancel-modal-add-account" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Crear Cuenta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Editar Saldo de Cuenta -->
+  <div id="modal-edit-account" class="modal-overlay hidden">
+    <div class="glass-card modal-card" style="max-width: 440px; width: 90%;">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-wallet text-primary"></i> Editar Saldo de Cuenta</h2>
+      </div>
+      <form id="form-edit-account" class="inline-form">
+        <input type="hidden" id="edit-account-id">
+        <div class="form-group">
+          <label for="edit-account-nombre">Nombre de la Cuenta</label>
+          <input type="text" id="edit-account-nombre" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-account-tipo">Tipo de Cuenta</label>
+            <select id="edit-account-tipo" required>
+              <option value="DEBITO">Débito (Banco)</option>
+              <option value="CREDITO">Crédito (Tarjeta / Préstamo)</option>
+              <option value="EFECTIVO">Efectivo</option>
+              <option value="SERVICIO">Servicio Fijo / Público</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-account-saldo">Saldo Actual ($)</label>
+            <input type="number" id="edit-account-saldo" step="0.01" required>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" id="btn-cancel-edit-account" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Guardar Saldo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Custom Confirmation Modal -->
   <div id="confirm-modal" class="modal-overlay hidden">
     <div class="glass-card modal-card" style="max-width: 400px; width: 90%; text-align: center;">
