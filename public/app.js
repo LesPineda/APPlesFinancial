@@ -2951,6 +2951,32 @@ function setupV2TabListeners() {
   const btnCancelEditDebt = document.getElementById('btn-cancel-edit-debt');
   if (btnCancelEditDebt) btnCancelEditDebt.onclick = () => closeModal('edit-debt-modal');
 
+  // Auto-fill amount & description when selecting a debt account in modal transaction form
+  const modalTxCuenta = document.getElementById('modal-tx-cuenta');
+  if (modalTxCuenta) {
+    modalTxCuenta.addEventListener('change', (e) => {
+      const selectedCuentaId = e.target.value;
+      const associatedDebt = debts.find(d => String(d.cuenta_id) === String(selectedCuentaId));
+      
+      const montoInput = document.getElementById('modal-tx-monto');
+      const descInput = document.getElementById('modal-tx-descripcion');
+      const tipoSelect = document.getElementById('modal-tx-tipo');
+
+      if (associatedDebt) {
+        if (montoInput) {
+          montoInput.value = Number(associatedDebt.pago_minimo) || Number(associatedDebt.saldo_total);
+        }
+        if (descInput) {
+          const accName = associatedDebt.cuenta ? associatedDebt.cuenta.nombre : 'deuda';
+          descInput.value = `Pago cuota ${accName}`;
+        }
+        if (tipoSelect) {
+          tipoSelect.value = 'GASTO';
+        }
+      }
+    });
+  }
+
   // Submit Modal Handlers
   const formAddTx = document.getElementById('form-modal-add-transaction');
   if (formAddTx) {
