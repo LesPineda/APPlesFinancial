@@ -3914,6 +3914,10 @@ function runV2DebtSimulation() {
     let monthTotalPaid = 0;
     let availableSnowball = currentExtraPool;
 
+    const debtPayments = {};
+    simDebts.forEach(d => { debtPayments[d.id] = 0; });
+
+    // 1. Minimum payments for all active debts
     for (const d of simDebts) {
       if (d.saldo <= 0) continue;
       const monthlyRate = Math.pow(1 + (d.tasaEa / 100), 1/12) - 1;
@@ -3924,15 +3928,26 @@ function runV2DebtSimulation() {
       const payMin = Math.min(d.saldo, d.pagoMin);
       d.saldo -= payMin;
       monthTotalPaid += payMin;
+      debtPayments[d.id] = (debtPayments[d.id] || 0) + payMin;
     }
 
+    // Target focus debt for snowball / avalanche
+    const targetDebtObj = simDebts.find(d => d.saldo > 0);
+    const targetMin = targetDebtObj ? (debtPayments[targetDebtObj.id] || 0) : 0;
+
+    // 2. Extra snowball payment
+    let targetExtra = 0;
     for (const d of simDebts) {
       if (d.saldo > 0 && availableSnowball > 0) {
         const extraPay = Math.min(d.saldo, availableSnowball);
         d.saldo -= extraPay;
         availableSnowball -= extraPay;
         monthTotalPaid += extraPay;
-        
+        debtPayments[d.id] = (debtPayments[d.id] || 0) + extraPay;
+        if (targetDebtObj && d.id === targetDebtObj.id) {
+          targetExtra += extraPay;
+        }
+
         if (d.saldo <= 0) {
           currentExtraPool += d.pagoMin;
         }
@@ -3940,8 +3955,9 @@ function runV2DebtSimulation() {
       }
     }
 
+    const targetPaidTotal = targetDebtObj ? (debtPayments[targetDebtObj.id] || 0) : 0;
+    const otherDebtsPaid = Math.max(0, monthTotalPaid - targetPaidTotal);
     const remainingTotal = simDebts.reduce((s, d) => s + Math.max(0, d.saldo), 0);
-    const targetDebt = simDebts.find(d => d.saldo > 0);
 
     const projectedDate = new Date(now.getFullYear(), now.getMonth() + months, 1);
     const monthName = projectedDate.toLocaleDateString('es-CO', { month: 'short', year: 'numeric' });
@@ -3949,8 +3965,12 @@ function runV2DebtSimulation() {
     monthLogs.push({
       month: months,
       dateStr: monthName,
-      target: targetDebt ? targetDebt.nombre : '¡LIBRE DE DEUDAS!',
-      paid: monthTotalPaid,
+      targetName: targetDebtObj ? targetDebtObj.nombre : '¡LIBRE DE DEUDAS!',
+      targetMin,
+      targetExtra,
+      targetPaidTotal,
+      otherDebtsPaid,
+      totalPaid: monthTotalPaid,
       remaining: remainingTotal
     });
   }
@@ -3980,33 +4000,53 @@ function runV2DebtSimulation() {
       </div>
     </div>
 
+    <!-- EXPLANATORY HELP BANNER -->
+    <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); padding:0.85rem 1.1rem; border-radius:12px; margin-top:1.2rem; font-size:0.8rem; color:#93c5fd; display:flex; align-items:flex-start; gap:0.6rem;">
+      <i class="fa-solid fa-lightbulb text-warning" style="font-size:1.1rem; margin-top:0.1rem;"></i>
+      <div>
+        <strong>¿Cómo leer esta tabla de aceleración?</strong>
+        <p style="margin:0.2rem 0 0; font-size:0.78rem; color:var(--text-muted);">
+          Para la <strong>Deuda Enfoque</strong> (ej. Addi) verás su cuota habitual más tu abono extra de $${formatMoney(extraAmount)}. La columna <strong>Presupuesto Total Mes</strong> incluye la suma de todas tus cuotas del mes juntas.
+        </p>
+      </div>
+    </div>
+
     <!-- PROJECTION TABLE -->
-    <div style="margin-top:1.2rem; overflow-x:auto;">
+    <div style="margin-top:1rem; overflow-x:auto;">
       <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left;">
         <thead>
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-muted);">
-            <th style="padding:0.5rem;">Mes</th>
-            <th style="padding:0.5rem;">Fecha Proyectada</th>
-            <th style="padding:0.5rem;">Deuda Objetivo #1</th>
-            <th style="padding:0.5rem;">Pago Total del Mes</th>
-            <th style="padding:0.5rem; text-align:right;">Saldo Total Restante</th>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.15); color:var(--text-muted); font-size:0.75rem;">
+            <th style="padding:0.6rem;">Mes</th>
+            <th style="padding:0.6rem;">Fecha</th>
+            <th style="padding:0.6rem;">Deuda Enfoque</th>
+            <th style="padding:0.6rem; text-align:right; color:#34d399;">Pago a esta Deuda</th>
+            <th style="padding:0.6rem; text-align:right;">Demás Cuotas del Mes</th>
+            <th style="padding:0.6rem; text-align:right; color:#fbbf24;">Presupuesto Total Mes</th>
+            <th style="padding:0.6rem; text-align:right;">Saldo Total Restante</th>
           </tr>
         </thead>
         <tbody>
           ${monthLogs.slice(0, 15).map(m => `
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
-              <td style="padding:0.5rem; font-weight:700; color:#fff;">Mes ${m.month}</td>
-              <td style="padding:0.5rem; color:var(--text-muted);">${m.dateStr}</td>
-              <td style="padding:0.5rem; color:#f59e0b; font-weight:600;">${escapeHTML(m.target)}</td>
-              <td style="padding:0.5rem; color:#10b981; font-weight:700;">$${formatMoney(m.paid)}</td>
-              <td style="padding:0.5rem; text-align:right; font-weight:700; color:${m.remaining === 0 ? '#34d399' : '#fff'};">
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+              <td style="padding:0.6rem; font-weight:700; color:#fff;">Mes ${m.month}</td>
+              <td style="padding:0.6rem; color:var(--text-muted);">${m.dateStr}</td>
+              <td style="padding:0.6rem; color:#f59e0b; font-weight:700;">
+                <i class="fa-solid fa-bullseye text-warning"></i> ${escapeHTML(m.targetName)}
+              </td>
+              <td style="padding:0.6rem; text-align:right; font-weight:700; color:#34d399;">
+                $${formatMoney(m.targetPaidTotal)}
+                ${m.targetExtra > 0 ? `<br><span style="font-size:0.68rem; color:var(--text-muted); font-weight:normal;">(Cuota $${formatMoney(m.targetMin)} + Extra $${formatMoney(m.targetExtra)})</span>` : ''}
+              </td>
+              <td style="padding:0.6rem; text-align:right; color:var(--text-muted);">$${formatMoney(m.otherDebtsPaid)}</td>
+              <td style="padding:0.6rem; text-align:right; font-weight:700; color:#fbbf24;">$${formatMoney(m.totalPaid)}</td>
+              <td style="padding:0.6rem; text-align:right; font-weight:700; color:${m.remaining === 0 ? '#34d399' : '#fff'};">
                 ${m.remaining === 0 ? '🎉 $0 (LIBRE)' : '$' + formatMoney(m.remaining)}
               </td>
             </tr>
           `).join('')}
         </tbody>
       </table>
-      ${monthLogs.length > 15 ? `<p style="font-size:0.72rem; color:var(--text-muted); text-align:center; margin-top:0.4rem;">... Mostrando los primeros 15 meses de la proyección.</p>` : ''}
+      ${monthLogs.length > 15 ? `<p style="font-size:0.72rem; color:var(--text-muted); text-align:center; margin-top:0.6rem;">... Mostrando los primeros 15 meses de la proyección.</p>` : ''}
     </div>
   `;
 }
