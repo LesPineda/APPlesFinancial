@@ -44,33 +44,10 @@ export class TransactionService {
         }
       });
 
-      // Determinar la cuenta bancaria de dinero disponible de la cual se deducirá el dinero real
-      let targetBankAccountId = data.cuenta_id;
-
-      if (data.tipo === 'GASTO') {
-        const selectedAccount = await tx.account.findUnique({ where: { id: data.cuenta_id } });
-        const isDebtOrService = await tx.debt.findFirst({ where: { cuenta_id: data.cuenta_id } });
-
-        // Si la cuenta seleccionada es de Deuda, Crédito o Servicio, el dinero real SALE de la cuenta bancaria líquida principal (Daviplata/Nequi)
-        if (isDebtOrService || selectedAccount?.tipo === 'CREDITO' || selectedAccount?.tipo === 'SERVICIO') {
-          const primaryBankAcc = await tx.account.findFirst({
-            where: {
-              tipo: { in: ['DEBITO', 'EFECTIVO'] },
-              saldo_actual: { gt: 0 }
-            },
-            orderBy: { saldo_actual: 'desc' }
-          });
-
-          if (primaryBankAcc) {
-            targetBankAccountId = primaryBankAcc.id;
-          }
-        }
-      }
-
-      // Modificar el saldo de la cuenta bancaria real
+      // Modificar el saldo de la cuenta seleccionada por el usuario
       const balanceChange = data.tipo === 'INGRESO' ? data.monto : -data.monto;
       await tx.account.update({
-        where: { id: targetBankAccountId },
+        where: { id: data.cuenta_id },
         data: {
           saldo_actual: {
             increment: balanceChange
@@ -117,8 +94,8 @@ export class TransactionService {
             }
           });
 
-          // Sync the associated account's saldo_actual to match the new debt balance
-          if (debtAcc) {
+          // Sync the associated account's saldo_actual to match the new debt balance if it's the target account
+          if (debtAcc && debtAcc.id === data.cuenta_id) {
             const isCredit = debtAcc.tipo === 'CREDITO';
             await tx.account.update({
               where: { id: debtAcc.id },
