@@ -27,8 +27,8 @@ app.use('/api', authMiddleware, apiRoutes);
 // Middleware global de manejo de errores
 app.use(errorHandler);
 
-// Iniciar servidor
-if (process.env.NODE_ENV !== 'test') {
+// Iniciar servidor (solo si no es entorno de pruebas y no es entorno serverless de Vercel)
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`🚀 Servidor ejecutándose en http://0.0.0.0:${PORT} (accesible en red local e IP)`);
   });

@@ -1,0 +1,797 @@
+{
+  "cuentas": [
+    {
+      "id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "nombre": "Banco Bogotá",
+      "tipo": "DEBITO",
+      "saldo_actual": -1202207.0,
+      "createdAt": "2026-08-06T00:24:49.218000Z",
+      "updatedAt": "2026-09-27T23:47:23.545000Z"
+    },
+    {
+      "id": "7f0c935f-9a11-41b6-aa3e-8c56940cfc07",
+      "nombre": "Banco Bogotá Corriente",
+      "tipo": "DEBITO",
+      "saldo_actual": 1.0,
+      "createdAt": "2026-08-06T00:25:16.404000Z",
+      "updatedAt": "2026-09-27T15:13:26.519000Z"
+    },
+    {
+      "id": "23a27e3c-1b36-4aeb-a514-0dfd8aa7cb7b",
+      "nombre": "Daviplata",
+      "tipo": "DEBITO",
+      "saldo_actual": 1302843.8899999997,
+      "createdAt": "2026-08-06T00:26:36.857000Z",
+      "updatedAt": "2026-09-27T16:36:58.286000Z"
+    },
+    {
+      "id": "790cf06e-d2db-43fe-973e-0c57e0ac5f60",
+      "nombre": "Falabella",
+      "tipo": "CREDITO",
+      "saldo_actual": -379113.5700000001,
+      "createdAt": "2026-08-06T00:38:10.687000Z",
+      "updatedAt": "2026-09-27T15:13:26.764000Z"
+    },
+    {
+      "id": "600ca003-efeb-4472-90c0-f8dc990ab4a7",
+      "nombre": "Tarjeta Golds",
+      "tipo": "CREDITO",
+      "saldo_actual": 0.0,
+      "createdAt": "2026-08-06T00:44:04.461000Z",
+      "updatedAt": "2026-09-27T16:16:53.220000Z"
+    },
+    {
+      "id": "c1b0f440-ca68-4a50-a8a2-37607e8f8bc4",
+      "nombre": "Credito libre 38",
+      "tipo": "CREDITO",
+      "saldo_actual": 0.0,
+      "createdAt": "2026-08-06T00:50:07.979000Z",
+      "updatedAt": "2026-09-27T16:16:53.213000Z"
+    },
+    {
+      "id": "8fb1fc9d-51fc-46a2-9a31-72f0a90cd7df",
+      "nombre": "Credito libre 16",
+      "tipo": "CREDITO",
+      "saldo_actual": 0.0,
+      "createdAt": "2026-08-06T00:55:27.208000Z",
+      "updatedAt": "2026-09-27T16:16:53.218000Z"
+    },
+    {
+      "id": "dea3b548-4fef-4897-813d-6c2a130b5df3",
+      "nombre": "Tuya Alkosto",
+      "tipo": "CREDITO",
+      "saldo_actual": -3417226.0,
+      "createdAt": "2026-08-06T00:59:14.282000Z",
+      "updatedAt": "2026-09-27T16:28:55.748000Z"
+    },
+    {
+      "id": "398c5c6d-1da1-4ad6-b6fd-9fa30fc4b957",
+      "nombre": "Nequi",
+      "tipo": "DEBITO",
+      "saldo_actual": -30782.21,
+      "createdAt": "2026-08-06T01:02:51.660000Z",
+      "updatedAt": "2026-09-27T15:34:57.191000Z"
+    },
+    {
+      "id": "6f6b1d43-8985-4e4b-b833-64a3ea57e257",
+      "nombre": "Addi",
+      "tipo": "CREDITO",
+      "saldo_actual": -175689.41,
+      "createdAt": "2026-08-06T01:16:54.705000Z",
+      "updatedAt": "2026-09-27T16:29:34.296000Z"
+    },
+    {
+      "id": "027188a4-d8f4-45e0-aa53-57cf8a418dad",
+      "nombre": "Rapicredit",
+      "tipo": "CREDITO",
+      "saldo_actual": -305841.0,
+      "createdAt": "2026-08-06T01:21:23.713000Z",
+      "updatedAt": "2026-09-27T15:13:27.498000Z"
+    },
+    {
+      "id": "8788de82-e64c-4d8a-a48d-963eaef19040",
+      "nombre": "Solventa",
+      "tipo": "CREDITO",
+      "saldo_actual": -672655.0,
+      "createdAt": "2026-08-06T01:26:11.770000Z",
+      "updatedAt": "2026-09-27T15:13:27.575000Z"
+    },
+    {
+      "id": "a577d234-d256-4fce-b9cb-fbab49017416",
+      "nombre": "Megan",
+      "tipo": "EFECTIVO",
+      "saldo_actual": 0.0,
+      "createdAt": "2026-08-18T23:54:38.055000Z",
+      "updatedAt": "2026-09-27T15:13:27.653000Z"
+    },
+    {
+      "id": "1e585373-4ed9-4bfd-bc0c-80a1c9f9887b",
+      "nombre": "telefonica movil",
+      "tipo": "EFECTIVO",
+      "saldo_actual": -7000.0,
+      "createdAt": "2026-08-18T23:56:01.153000Z",
+      "updatedAt": "2026-09-27T15:32:03.637000Z"
+    },
+    {
+      "id": "b6db8cb0-9d01-4fd7-9ea3-e5e0135a0cd5",
+      "nombre": "Plan Tigo",
+      "tipo": "SERVICIO",
+      "saldo_actual": 75000.0,
+      "createdAt": "2026-08-19T00:49:15.037000Z",
+      "updatedAt": "2026-09-27T16:30:45.239000Z"
+    },
+    {
+      "id": "5e697db1-a720-4269-aed3-834fa133980c",
+      "nombre": "Internet",
+      "tipo": "SERVICIO",
+      "saldo_actual": 127990.0,
+      "createdAt": "2026-08-19T00:53:43.956000Z",
+      "updatedAt": "2026-09-27T16:32:38.991000Z"
+    },
+    {
+      "id": "b034f5c4-d799-4054-8543-5241810751dc",
+      "nombre": "Gas",
+      "tipo": "SERVICIO",
+      "saldo_actual": 14488.0,
+      "createdAt": "2026-08-19T01:21:27.985000Z",
+      "updatedAt": "2026-09-27T23:47:23.550000Z"
+    },
+    {
+      "id": "0461ea92-6170-4db5-b343-f9c22b07cbc0",
+      "nombre": "Cadena",
+      "tipo": "SERVICIO",
+      "saldo_actual": 200000.0,
+      "createdAt": "2026-08-19T01:42:00.148000Z",
+      "updatedAt": "2026-09-27T16:35:13.755000Z"
+    },
+    {
+      "id": "a7ba816c-525b-46f4-b810-9bd1aaa8e46b",
+      "nombre": "Apartamento",
+      "tipo": "SERVICIO",
+      "saldo_actual": 826000.0,
+      "createdAt": "2026-08-19T02:39:38.047000Z",
+      "updatedAt": "2026-09-27T15:13:28.087000Z"
+    },
+    {
+      "id": "b72ec107-cedd-4af6-bc14-523cd4d53706",
+      "nombre": "arriendo pa",
+      "tipo": "SERVICIO",
+      "saldo_actual": 700000.0,
+      "createdAt": "2026-08-29T18:22:59.559000Z",
+      "updatedAt": "2026-09-27T15:13:28.253000Z"
+    },
+    {
+      "id": "8586e6e8-f100-43ce-810f-768ada2570c3",
+      "nombre": "luz",
+      "tipo": "SERVICIO",
+      "saldo_actual": 115000.0,
+      "createdAt": "2026-08-29T18:30:58.445000Z",
+      "updatedAt": "2026-09-27T16:25:52.016000Z"
+    },
+    {
+      "id": "204d7328-d25c-4a9f-b71a-9488c68dc12d",
+      "nombre": "Crédito Unificado",
+      "tipo": "CREDITO",
+      "saldo_actual": -62438942.0,
+      "createdAt": "2026-09-27T16:16:53.221000Z",
+      "updatedAt": "2026-09-27T16:16:53.221000Z"
+    }
+  ],
+  "deudas": [
+    {
+      "id": "7265c7cc-e3a8-4654-a13e-161ec9ce5ec5",
+      "cuenta_id": "790cf06e-d2db-43fe-973e-0c57e0ac5f60",
+      "saldo_total": 379113.5700000001,
+      "tasa_interes_ea": 28.15,
+      "pago_minimo": 271520.7,
+      "fecha_corte": "2026-07-24T00:00:00Z",
+      "fecha_limite_pago": "2026-11-10T00:00:00Z",
+      "createdAt": "2026-08-06T00:42:43.087000Z",
+      "updatedAt": "2026-09-27T15:13:28.409000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "183025e7-ea7e-4473-bcff-8becfa6ff883",
+      "cuenta_id": "600ca003-efeb-4472-90c0-f8dc990ab4a7",
+      "saldo_total": 0.0,
+      "tasa_interes_ea": 26.72,
+      "pago_minimo": 0.0,
+      "fecha_corte": "2026-07-15T00:00:00Z",
+      "fecha_limite_pago": "2026-10-05T00:00:00Z",
+      "createdAt": "2026-08-06T00:48:27.777000Z",
+      "updatedAt": "2026-09-27T16:16:53.221000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "ab524b9b-b979-4ecb-98e8-d6bd72934fb6",
+      "cuenta_id": "c1b0f440-ca68-4a50-a8a2-37607e8f8bc4",
+      "saldo_total": 0.0,
+      "tasa_interes_ea": 21.55,
+      "pago_minimo": 0.0,
+      "fecha_corte": "2026-07-11T00:00:00Z",
+      "fecha_limite_pago": "2026-06-25T00:00:00Z",
+      "createdAt": "2026-08-06T00:53:22.575000Z",
+      "updatedAt": "2026-09-27T16:16:53.216000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "82adf46f-49f3-40ee-a677-29929174d3d7",
+      "cuenta_id": "8fb1fc9d-51fc-46a2-9a31-72f0a90cd7df",
+      "saldo_total": 0.0,
+      "tasa_interes_ea": 25.19,
+      "pago_minimo": 0.0,
+      "fecha_corte": "2026-07-07T00:00:00Z",
+      "fecha_limite_pago": "2026-08-02T00:00:00Z",
+      "createdAt": "2026-08-06T00:57:08.470000Z",
+      "updatedAt": "2026-09-27T16:16:53.219000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "10b0cc44-d593-4250-8180-cfae77a5f6ec",
+      "cuenta_id": "dea3b548-4fef-4897-813d-6c2a130b5df3",
+      "saldo_total": 3417226.0,
+      "tasa_interes_ea": 28.14,
+      "pago_minimo": 415971.98,
+      "fecha_corte": "2026-07-20T00:00:00Z",
+      "fecha_limite_pago": "2026-10-02T00:00:00Z",
+      "createdAt": "2026-08-06T01:01:51.231000Z",
+      "updatedAt": "2026-09-27T16:28:55.748000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "e25bc779-96e4-4ca4-b428-78b5a0e8d073",
+      "cuenta_id": "6f6b1d43-8985-4e4b-b833-64a3ea57e257",
+      "saldo_total": 175689.41,
+      "tasa_interes_ea": 28.69,
+      "pago_minimo": 80411.0,
+      "fecha_corte": "2026-07-15T00:00:00Z",
+      "fecha_limite_pago": "2026-10-14T00:00:00Z",
+      "createdAt": "2026-08-06T01:20:00.285000Z",
+      "updatedAt": "2026-09-27T16:29:34.296000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "3d7d3d2b-ef11-4004-ba4e-c8ec8fd48a7a",
+      "cuenta_id": "027188a4-d8f4-45e0-aa53-57cf8a418dad",
+      "saldo_total": 299603.0,
+      "tasa_interes_ea": 25.0,
+      "pago_minimo": 326308.0,
+      "fecha_corte": "2026-07-22T00:00:00Z",
+      "fecha_limite_pago": "2026-10-21T00:00:00Z",
+      "createdAt": "2026-08-06T01:23:49.487000Z",
+      "updatedAt": "2026-09-27T15:13:28.887000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "321f0568-8844-469b-a59c-b7acf126d180",
+      "cuenta_id": "8788de82-e64c-4d8a-a48d-963eaef19040",
+      "saldo_total": 678135.0,
+      "tasa_interes_ea": 25.0,
+      "pago_minimo": 672655.0,
+      "fecha_corte": "2026-07-22T00:00:00Z",
+      "fecha_limite_pago": "2026-09-15T00:00:00Z",
+      "createdAt": "2026-08-06T01:30:48.552000Z",
+      "updatedAt": "2026-09-27T15:13:28.953000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "f61560e0-a0a5-40e0-9398-58560b896cab",
+      "cuenta_id": "a577d234-d256-4fce-b9cb-fbab49017416",
+      "saldo_total": 0.0,
+      "tasa_interes_ea": 0.0,
+      "pago_minimo": 160000.0,
+      "fecha_corte": "2026-08-18T00:00:00Z",
+      "fecha_limite_pago": "2026-09-18T00:00:00Z",
+      "createdAt": "2026-08-18T23:56:23.748000Z",
+      "updatedAt": "2026-09-27T15:13:29.022000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "80fa6361-79e9-4cfc-9b7d-0aaeaf009996",
+      "cuenta_id": "1e585373-4ed9-4bfd-bc0c-80a1c9f9887b",
+      "saldo_total": 0.0,
+      "tasa_interes_ea": 0.0,
+      "pago_minimo": 0.0,
+      "fecha_corte": "2026-08-18T00:00:00Z",
+      "fecha_limite_pago": "2026-09-18T00:00:00Z",
+      "createdAt": "2026-08-18T23:56:39.010000Z",
+      "updatedAt": "2026-09-27T15:13:29.221000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "c76cb2d7-73e5-4425-85f4-381f91600078",
+      "cuenta_id": "b6db8cb0-9d01-4fd7-9ea3-e5e0135a0cd5",
+      "saldo_total": 78000.0,
+      "tasa_interes_ea": 0.0,
+      "pago_minimo": 75000.0,
+      "fecha_corte": "2026-08-04T00:00:00Z",
+      "fecha_limite_pago": "2026-09-25T00:00:00Z",
+      "createdAt": "2026-08-19T00:49:34.444000Z",
+      "updatedAt": "2026-09-27T23:09:20.256000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "78f0781d-5a60-480b-a383-687d6b548a2b",
+      "cuenta_id": "5e697db1-a720-4269-aed3-834fa133980c",
+      "saldo_total": 127990.0,
+      "tasa_interes_ea": 0.0,
+      "pago_minimo": 127990.0,
+      "fecha_corte": "2026-08-10T00:00:00Z",
+      "fecha_limite_pago": "2026-10-18T00:00:00Z",
+      "createdAt": "2026-08-19T00:58:19.411000Z",
+      "updatedAt": "2026-09-27T16:32:38.990000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "90f93b56-c0fe-4c53-8d5d-39b330882097",
+      "cuenta_id": "b034f5c4-d799-4054-8543-5241810751dc",
+      "saldo_total": 14488.0,
+      "tasa_interes_ea": 0.0,
+      "pago_minimo": 25000.0,
+      "fecha_corte": "2026-08-07T00:00:00Z",
+      "fecha_limite_pago": "2027-02-18T00:00:00Z",
+      "createdAt": "2026-08-19T01:21:46.536000Z",
+      "updatedAt": "2026-09-27T23:47:23.550000Z",
+      "cubierto_por": "kevin"
+    },
+    {
+      "id": "c5d9f59e-98a4-41bf-8913-4aa6d2a4f150",
+      "cuenta_id": "a7ba816c-525b-46f4-b810-9bd1aaa8e46b",
+      "saldo_total": 876000.0,
+      "tasa_interes_ea": 0.0,
+      "pago_minimo": 876000.0,
+      "fecha_corte": "2026-08-25T00:00:00Z",
+      "fecha_limite_pago": "2026-09-25T00:00:00Z",
+      "createdAt": "2026-08-19T02:40:36.816000Z",
+      "updatedAt": "2026-09-27T15:13:29.535000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "30b027b9-4cf5-4436-8a51-b18d30e41839",
+      "cuenta_id": "b72ec107-cedd-4af6-bc14-523cd4d53706",
+      "saldo_total": 700000.0,
+      "tasa_interes_ea": 0.0,
+      "pago_minimo": 700000.0,
+      "fecha_corte": "2026-09-30T00:00:00Z",
+      "fecha_limite_pago": "2026-10-02T00:00:00Z",
+      "createdAt": "2026-08-29T18:23:37.736000Z",
+      "updatedAt": "2026-09-27T15:13:29.620000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "4fc93fc2-652e-4872-a956-f864c6a0185a",
+      "cuenta_id": "8586e6e8-f100-43ce-810f-768ada2570c3",
+      "saldo_total": 35000.0,
+      "tasa_interes_ea": 0.0,
+      "pago_minimo": 197000.0,
+      "fecha_corte": "2026-08-28T00:00:00Z",
+      "fecha_limite_pago": "2026-11-30T00:00:00Z",
+      "createdAt": "2026-08-29T18:31:46.168000Z",
+      "updatedAt": "2026-09-27T22:02:15.050000Z",
+      "cubierto_por": "kevin"
+    },
+    {
+      "id": "5c6649cc-addb-4baf-8e02-6199d75ccf38",
+      "cuenta_id": "0461ea92-6170-4db5-b343-f9c22b07cbc0",
+      "saldo_total": 200000.0,
+      "tasa_interes_ea": 0.0,
+      "pago_minimo": 200000.0,
+      "fecha_corte": "2026-08-20T00:00:00Z",
+      "fecha_limite_pago": "2026-11-02T00:00:00Z",
+      "createdAt": "2026-08-29T21:49:39.256000Z",
+      "updatedAt": "2026-09-27T16:35:13.755000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "b87eadb8-ea55-402d-98f4-125bf62eb8b9",
+      "cuenta_id": "0461ea92-6170-4db5-b343-f9c22b07cbc0",
+      "saldo_total": 200000.0,
+      "tasa_interes_ea": 0.0,
+      "pago_minimo": 200000.0,
+      "fecha_corte": "2026-08-20T00:00:00Z",
+      "fecha_limite_pago": "2026-10-15T05:00:00Z",
+      "createdAt": "2026-08-29T21:49:39.424000Z",
+      "updatedAt": "2026-09-27T21:11:23.612000Z",
+      "cubierto_por": null
+    },
+    {
+      "id": "8017be4b-ba01-4e6d-af89-f18be46e2712",
+      "cuenta_id": "204d7328-d25c-4a9f-b71a-9488c68dc12d",
+      "saldo_total": 62438942.0,
+      "tasa_interes_ea": 13.17,
+      "pago_minimo": 1323191.0,
+      "fecha_corte": "2026-10-04T00:00:00Z",
+      "fecha_limite_pago": "2026-10-14T00:00:00Z",
+      "createdAt": "2026-09-27T16:16:53.224000Z",
+      "updatedAt": "2026-09-27T16:22:01.382000Z",
+      "cubierto_por": null
+    }
+  ],
+  "transacciones": [
+    {
+      "id": "502312c9-6bdc-4d7b-b808-6a9f8bb962e7",
+      "cuenta_id": "23a27e3c-1b36-4aeb-a514-0dfd8aa7cb7b",
+      "tipo": "INGRESO",
+      "monto": 2696444.0,
+      "fecha_transaccion": "2026-08-18T23:48:00Z",
+      "descripcion": "Nomina asistia",
+      "createdAt": "2026-08-18T23:51:00.615000Z",
+      "updatedAt": "2026-09-27T15:13:29.931000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "4e2758bb-14b7-4bb4-8ada-0db705e97d28",
+      "cuenta_id": "23a27e3c-1b36-4aeb-a514-0dfd8aa7cb7b",
+      "tipo": "GASTO",
+      "monto": 160000.0,
+      "fecha_transaccion": "2026-08-19T00:13:00Z",
+      "descripcion": "Pago cuota Megan",
+      "createdAt": "2026-08-19T00:14:14.556000Z",
+      "updatedAt": "2026-09-27T15:13:30.020000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "e1c54c78-8ab9-47db-bad1-9cd8b98ad306",
+      "cuenta_id": "23a27e3c-1b36-4aeb-a514-0dfd8aa7cb7b",
+      "tipo": "GASTO",
+      "monto": 75000.0,
+      "fecha_transaccion": "2026-08-19T01:46:00Z",
+      "descripcion": "Pago cuota Plan Tigo",
+      "createdAt": "2026-08-19T01:46:41.998000Z",
+      "updatedAt": "2026-09-27T15:13:30.109000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "c9c29951-5501-4e35-a9ae-c659d219aac9",
+      "cuenta_id": "b034f5c4-d799-4054-8543-5241810751dc",
+      "tipo": "GASTO",
+      "monto": 20600.0,
+      "fecha_transaccion": "2026-08-19T01:56:00Z",
+      "descripcion": "Pago cuota Gas",
+      "createdAt": "2026-08-19T01:57:07.589000Z",
+      "updatedAt": "2026-09-27T15:13:30.179000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "ce017b38-e31f-47f5-8a22-9246bde20594",
+      "cuenta_id": "8fb1fc9d-51fc-46a2-9a31-72f0a90cd7df",
+      "tipo": "GASTO",
+      "monto": 423628.82,
+      "fecha_transaccion": "2026-08-19T01:58:00Z",
+      "descripcion": "Pago cuota Credito libre 16",
+      "createdAt": "2026-08-19T01:59:22.157000Z",
+      "updatedAt": "2026-09-27T15:13:30.253000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "04eace44-d206-406a-b2bb-56a54f4375c3",
+      "cuenta_id": "8788de82-e64c-4d8a-a48d-963eaef19040",
+      "tipo": "GASTO",
+      "monto": 678135.0,
+      "fecha_transaccion": "2026-08-19T02:07:00Z",
+      "descripcion": "Pago cuota Solventa",
+      "createdAt": "2026-08-19T02:08:20.339000Z",
+      "updatedAt": "2026-09-27T15:13:30.326000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "1d0d30fa-a64c-41f0-9e0a-d67854d29696",
+      "cuenta_id": "0461ea92-6170-4db5-b343-f9c22b07cbc0",
+      "tipo": "GASTO",
+      "monto": 400000.0,
+      "fecha_transaccion": "2026-08-19T02:17:00Z",
+      "descripcion": "Pago cuota Cadena",
+      "createdAt": "2026-08-19T02:17:52.738000Z",
+      "updatedAt": "2026-09-27T15:13:30.420000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "c4032fd3-9db8-4c70-af5c-15430af5806b",
+      "cuenta_id": "6f6b1d43-8985-4e4b-b833-64a3ea57e257",
+      "tipo": "GASTO",
+      "monto": 80594.59,
+      "fecha_transaccion": "2026-08-19T02:21:00Z",
+      "descripcion": "Pago cuota Addi",
+      "createdAt": "2026-08-19T02:21:25.340000Z",
+      "updatedAt": "2026-09-27T15:13:30.497000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "7098e1c9-b87f-49d1-8c7b-18878d6e80ab",
+      "cuenta_id": "790cf06e-d2db-43fe-973e-0c57e0ac5f60",
+      "tipo": "GASTO",
+      "monto": 271520.7,
+      "fecha_transaccion": "2026-08-19T02:24:00Z",
+      "descripcion": "Pago cuota Falabella",
+      "createdAt": "2026-08-19T02:25:53.747000Z",
+      "updatedAt": "2026-09-27T15:13:30.564000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "ecbc957d-bd5c-464a-98d6-88269edc8f06",
+      "cuenta_id": "027188a4-d8f4-45e0-aa53-57cf8a418dad",
+      "tipo": "GASTO",
+      "monto": 326308.0,
+      "fecha_transaccion": "2026-08-19T02:34:00Z",
+      "descripcion": "Pago cuota Rapicredit",
+      "createdAt": "2026-08-19T02:35:01.793000Z",
+      "updatedAt": "2026-09-27T15:13:30.631000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "e090ec47-d30d-4740-a63f-41a8b731a9e3",
+      "cuenta_id": "5e697db1-a720-4269-aed3-834fa133980c",
+      "tipo": "GASTO",
+      "monto": 127990.0,
+      "fecha_transaccion": "2026-08-19T02:38:00Z",
+      "descripcion": "Pago cuota Internet",
+      "createdAt": "2026-08-19T02:39:02.911000Z",
+      "updatedAt": "2026-09-27T15:13:30.697000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "647136d0-8907-4072-8459-9fd6f0f41ca5",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "INGRESO",
+      "monto": 3434375.0,
+      "fecha_transaccion": "2026-08-28T18:11:00Z",
+      "descripcion": "nomina ortomac",
+      "createdAt": "2026-08-29T18:12:28.744000Z",
+      "updatedAt": "2026-09-27T15:13:30.990000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "05ee2586-d8af-47be-bd1f-c5ef5debf2d2",
+      "cuenta_id": "8fb1fc9d-51fc-46a2-9a31-72f0a90cd7df",
+      "tipo": "GASTO",
+      "monto": 321752.0,
+      "fecha_transaccion": "2026-08-29T18:12:00Z",
+      "descripcion": "Pago cuota Credito libre 16",
+      "createdAt": "2026-08-29T18:13:13.291000Z",
+      "updatedAt": "2026-09-27T15:13:31.064000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "4ef1df6a-336a-4298-ae37-28ccb2970696",
+      "cuenta_id": "600ca003-efeb-4472-90c0-f8dc990ab4a7",
+      "tipo": "GASTO",
+      "monto": 550940.0,
+      "fecha_transaccion": "2026-08-29T18:13:00Z",
+      "descripcion": "Pago cuota Tarjeta Golds",
+      "createdAt": "2026-08-29T18:13:46.472000Z",
+      "updatedAt": "2026-09-27T15:13:31.121000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "fe7857f1-eea9-403f-85a9-09575a847e0c",
+      "cuenta_id": "1e585373-4ed9-4bfd-bc0c-80a1c9f9887b",
+      "tipo": "GASTO",
+      "monto": 38000.0,
+      "fecha_transaccion": "2026-08-29T18:18:00Z",
+      "descripcion": "Pago cuota telefonica movil",
+      "createdAt": "2026-08-29T18:18:22.810000Z",
+      "updatedAt": "2026-09-27T15:13:31.186000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "9d464fe8-cd93-421d-8777-9123cfbfaa49",
+      "cuenta_id": "b72ec107-cedd-4af6-bc14-523cd4d53706",
+      "tipo": "GASTO",
+      "monto": 700000.0,
+      "fecha_transaccion": "2026-08-29T18:24:00Z",
+      "descripcion": "Pago cuota arriendo pa",
+      "createdAt": "2026-08-29T18:24:58.917000Z",
+      "updatedAt": "2026-09-27T15:13:31.254000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "c963b7e9-4f55-4a6f-ae1a-9b516d585ec4",
+      "cuenta_id": "a7ba816c-525b-46f4-b810-9bd1aaa8e46b",
+      "tipo": "GASTO",
+      "monto": 876000.0,
+      "fecha_transaccion": "2026-08-29T18:27:00Z",
+      "descripcion": "Pago cuota Apartamento",
+      "createdAt": "2026-08-29T18:27:37.311000Z",
+      "updatedAt": "2026-09-27T15:13:31.320000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "7d68aa29-c60b-4ad4-ab8f-c176e7609393",
+      "cuenta_id": "8586e6e8-f100-43ce-810f-768ada2570c3",
+      "tipo": "GASTO",
+      "monto": 197000.0,
+      "fecha_transaccion": "2026-08-29T18:32:00Z",
+      "descripcion": "Pago cuota luz",
+      "createdAt": "2026-08-29T18:32:25.310000Z",
+      "updatedAt": "2026-09-27T15:13:31.387000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "cfe95963-a26c-495a-a8e8-2e0980990f8e",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "GASTO",
+      "monto": 137000.0,
+      "fecha_transaccion": "2026-08-29T22:25:00Z",
+      "descripcion": "otros ajuste",
+      "createdAt": "2026-08-29T22:26:16.807000Z",
+      "updatedAt": "2026-09-27T15:13:31.464000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "5f523f4c-a659-4748-9bbf-ce7a4280e284",
+      "cuenta_id": "027188a4-d8f4-45e0-aa53-57cf8a418dad",
+      "tipo": "GASTO",
+      "monto": 299603.0,
+      "fecha_transaccion": "2026-08-30T01:06:00Z",
+      "descripcion": "Pago cuota Rapicredit",
+      "createdAt": "2026-08-30T01:07:08.480000Z",
+      "updatedAt": "2026-09-27T15:13:31.525000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "092c6b3a-cd0c-413f-a232-74cd37cf7705",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "GASTO",
+      "monto": 45000.0,
+      "fecha_transaccion": "2026-08-29T17:07:00Z",
+      "descripcion": "Gasolina Moto",
+      "createdAt": "2026-08-30T01:35:58.662000Z",
+      "updatedAt": "2026-09-27T15:13:31.620000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "dd48d0c7-6063-4a03-ad7e-f257b3a7707f",
+      "cuenta_id": "790cf06e-d2db-43fe-973e-0c57e0ac5f60",
+      "tipo": "GASTO",
+      "monto": 200000.0,
+      "fecha_transaccion": "2026-08-30T18:23:00Z",
+      "descripcion": "Pago cuota Falabella",
+      "createdAt": "2026-08-30T18:23:38.704000Z",
+      "updatedAt": "2026-09-27T15:13:31.719000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "a4e25617-f164-47aa-a239-182e871a5f8f",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "GASTO",
+      "monto": 39900.0,
+      "fecha_transaccion": "2026-09-24T15:54:00Z",
+      "descripcion": "Gasolina Moto",
+      "createdAt": "2026-09-27T15:54:58.054000Z",
+      "updatedAt": "2026-09-27T15:54:58.054000Z",
+      "kilometraje": 28015
+    },
+    {
+      "id": "cb266a2d-6a28-4c90-875c-d25b40dc76ba",
+      "cuenta_id": "23a27e3c-1b36-4aeb-a514-0dfd8aa7cb7b",
+      "tipo": "INGRESO",
+      "monto": 2696444.0,
+      "fecha_transaccion": "2026-09-16T16:26:00Z",
+      "descripcion": "Nomina asistia",
+      "createdAt": "2026-09-27T16:27:26.817000Z",
+      "updatedAt": "2026-09-27T16:27:26.817000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "804a4577-8c94-48b0-9367-78b4f1455f76",
+      "cuenta_id": "dea3b548-4fef-4897-813d-6c2a130b5df3",
+      "tipo": "GASTO",
+      "monto": 482774.0,
+      "fecha_transaccion": "2026-09-16T16:28:00Z",
+      "descripcion": "Pago cuota Tuya Alkosto",
+      "createdAt": "2026-09-27T16:28:55.742000Z",
+      "updatedAt": "2026-09-27T16:28:55.742000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "edf82dd1-2b8c-4778-a415-73f23b3f6189",
+      "cuenta_id": "6f6b1d43-8985-4e4b-b833-64a3ea57e257",
+      "tipo": "GASTO",
+      "monto": 80503.0,
+      "fecha_transaccion": "2026-09-16T16:29:00Z",
+      "descripcion": "Pago cuota Addi",
+      "createdAt": "2026-09-27T16:29:34.290000Z",
+      "updatedAt": "2026-09-27T16:29:34.290000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "be74d9d2-7df8-4665-9a6c-a8816ad79d4b",
+      "cuenta_id": "b6db8cb0-9d01-4fd7-9ea3-e5e0135a0cd5",
+      "tipo": "GASTO",
+      "monto": 75000.0,
+      "fecha_transaccion": "2026-09-16T16:30:00Z",
+      "descripcion": "Pago cuota Plan Tigo",
+      "createdAt": "2026-09-27T16:30:45.232000Z",
+      "updatedAt": "2026-09-27T16:30:45.232000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "aed754ca-8884-47e4-b809-d90bfb481467",
+      "cuenta_id": "5e697db1-a720-4269-aed3-834fa133980c",
+      "tipo": "GASTO",
+      "monto": 127990.0,
+      "fecha_transaccion": "2026-09-16T16:32:00Z",
+      "descripcion": "Pago cuota Internet",
+      "createdAt": "2026-09-27T16:32:38.985000Z",
+      "updatedAt": "2026-09-27T16:32:38.985000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "f1031ad8-5d55-473d-b661-dba54acec4b7",
+      "cuenta_id": "0461ea92-6170-4db5-b343-f9c22b07cbc0",
+      "tipo": "GASTO",
+      "monto": 200000.0,
+      "fecha_transaccion": "2026-09-16T16:35:00Z",
+      "descripcion": "Pago cuota Cadena",
+      "createdAt": "2026-09-27T16:35:13.750000Z",
+      "updatedAt": "2026-09-27T16:35:13.750000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "2a25f8f5-b2db-4840-9da7-0162e20da403",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "GASTO",
+      "monto": 550000.0,
+      "fecha_transaccion": "2026-09-16T16:35:00Z",
+      "descripcion": "prestamo maria v",
+      "createdAt": "2026-09-27T16:35:57.850000Z",
+      "updatedAt": "2026-09-27T16:35:57.850000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "2c6d4e1a-0d8a-402e-9523-260085a9a194",
+      "cuenta_id": "23a27e3c-1b36-4aeb-a514-0dfd8aa7cb7b",
+      "tipo": "GASTO",
+      "monto": 360000.0,
+      "fecha_transaccion": "2026-09-16T16:36:00Z",
+      "descripcion": "viaje p",
+      "createdAt": "2026-09-27T16:36:58.274000Z",
+      "updatedAt": "2026-09-27T16:36:58.274000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "b154706c-678b-4e0c-9356-49e9c9c98fad",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "GASTO",
+      "monto": 104000.0,
+      "fecha_transaccion": "2026-09-23T04:41:00Z",
+      "descripcion": "pago martha",
+      "createdAt": "2026-09-27T23:42:03.969000Z",
+      "updatedAt": "2026-09-27T23:42:03.969000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "8db61a4a-eeef-4489-b66c-cad7f20165db",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "GASTO",
+      "monto": 80000.0,
+      "fecha_transaccion": "2026-09-28T04:43:00Z",
+      "descripcion": "pago admin",
+      "createdAt": "2026-09-27T23:43:22.611000Z",
+      "updatedAt": "2026-09-27T23:43:22.611000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "4cc1e927-89f0-4afe-965f-9a354e9a81ee",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "GASTO",
+      "monto": 282900.0,
+      "fecha_transaccion": "2026-09-27T04:46:00Z",
+      "descripcion": "gastos varios",
+      "createdAt": "2026-09-27T23:46:28.339000Z",
+      "updatedAt": "2026-09-27T23:46:28.339000Z",
+      "kilometraje": null
+    },
+    {
+      "id": "3bcb2a68-cccf-4e0b-a110-6f1f2d369876",
+      "cuenta_id": "5b29cb00-6bed-4a42-955a-7b7d79fd7336",
+      "tipo": "GASTO",
+      "monto": 14488.0,
+      "fecha_transaccion": "2026-09-28T04:46:00Z",
+      "descripcion": "gastos varios",
+      "createdAt": "2026-09-27T23:47:23.541000Z",
+      "updatedAt": "2026-09-27T23:47:23.541000Z",
+      "kilometraje": null
+    }
+  ]
+}
